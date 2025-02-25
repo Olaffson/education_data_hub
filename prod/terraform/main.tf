@@ -15,7 +15,7 @@ resource "azurerm_storage_account" "datalake" {
   location                 = azurerm_resource_group.rg.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
-  is_hns_enabled           = true  # Data Lake Gen2 activé
+  is_hns_enabled           = true # Data Lake Gen2 activé
 }
 
 # Création des Containers (Blobs) pour le Data Lake
