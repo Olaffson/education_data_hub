@@ -35,11 +35,11 @@ jobs:
       - name: 🔍 Terraform Format Check
         run: terraform fmt -check
 
-      - name: 🔎 Terraform Validate
-        run: terraform validate
-
       - name: 🚀 Terraform Init
         run: terraform init
+        
+      - name: 🔎 Terraform Validate
+        run: terraform validate
 
       - name: 📖 Terraform Plan
         run: terraform plan -out=tfplan
