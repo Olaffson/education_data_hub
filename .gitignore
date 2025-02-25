@@ -1,3 +1,17 @@
+# help
+help.txt
+dev/
+.cursor/
+*.ps1
+
+# Fichiers et dossiers Terraform
+dev/terraform/
+*.tfstate
+*.tfstate.backup
+.terraform/
+terraform.tfvars
+terraform.tfvars.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -169,3 +183,23 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# Crash log files
+crash.log
+
+# Sensitive variables files
+*.tfvars
+*.tfvars.json
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
