@@ -13,5 +13,5 @@ variable "location" {
 variable "storage_account_name" {
   description = "Nom du Storage Account"
   type        = string
-  default     = "datalakeokotwica"
+  default     = "sadatalakeokotwicaprod"
 }
