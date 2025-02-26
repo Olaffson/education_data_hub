@@ -3,6 +3,7 @@ import logging
 from azure.storage.blob import BlobServiceClient
 from azure.identity import DefaultAzureCredential
 from azure.core.exceptions import AzureError
+import json
 
 # Configuration du logging
 logger = logging.getLogger(__name__)
@@ -22,6 +23,29 @@ try:
 except AzureError as e:
     logger.error(f"Erreur d'initialisation Azure: {str(e)}")
     raise
+
+
+def upload_json_to_azure(json_data, destination_folder, file_name):
+    """
+    Upload un JSON directement sur Azure Blob Storage depuis un objet Python.
+    """
+    try:
+        logger.info(f"Préparation du JSON pour upload vers {destination_folder}/{file_name}")
+        json_content = json.dumps(json_data, ensure_ascii=False, indent=4).encode("utf-8")
+        
+        blob_name = f"{destination_folder}/{file_name}"
+        blob_client = container_client.get_blob_client(blob_name)
+
+        logger.info(f"Upload vers {blob_name}")
+        blob_client.upload_blob(json_content, overwrite=True)
+        logger.info(f"✅ JSON uploadé avec succès: {blob_name}")
+
+    except AzureError as e:
+        logger.error(f"❌ Erreur Azure lors de l'upload: {str(e)}")
+        raise
+    except Exception as e:
+        logger.error(f"❌ Erreur inattendue lors de l'upload: {str(e)}")
+        raise
 
 def upload_from_url(file_url, destination_folder, file_name):
     """
