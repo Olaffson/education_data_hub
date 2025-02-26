@@ -69,3 +69,19 @@ Les logs incluent :
 - Niveau de log
 - Messages détaillés sur les opérations
 - Erreurs éventuelles
+
+## Workflows GitHub Actions
+
+Les scripts d'import sont automatisés via des workflows GitHub Actions :
+
+- Import quotidien des données INSEE (tous les jours à 02:00 UTC)
+- Import hebdomadaire des données data.gouv.fr (tous les lundis à 03:00 UTC)
+- Import mensuel des données OpenDataSoft (le 1er du mois à 04:00 UTC)
+
+Les workflows :
+- Vérifient l'existence des données avant l'import
+- Exécutent les scripts d'import
+- Notifient en cas d'erreur
+- Créent des artefacts avec les logs d'exécution
+
+Les workflows sont configurés dans le dossier `.github/workflows/` du projet.

@@ -42,8 +42,13 @@ jobs:
         run: terraform validate
 
       - name: 📖 Terraform Plan
-        run: terraform plan -out=tfplan
+        id: plan
+        run: terraform plan -out=tfplan -detailed-exitcode || echo "::set-output name=has_changes::true"
 
       - name: ✅ Terraform Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.plan.outputs.has_changes == 'true'
         run: terraform apply -auto-approve tfplan
+        
+      - name: 📝 No Changes Required
+        if: steps.plan.outputs.has_changes != 'true'
+        run: echo "Aucun changement nécessaire - toutes les ressources sont déjà créées"
