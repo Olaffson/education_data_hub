@@ -31,7 +31,7 @@ def check_files_exist():
     for _, file_name in urls_with_filenames.items():
         blob_path = f"{DESTINATION_FOLDER}/{file_name}"
         exists = blob_path in existing_blobs
-        logger.info(f"Fichier {file_name}: {'Existe' if exists else 'N\'existe pas'}")
+        logger.info(f"Fichier {file_name}: {'Existe' if exists else 'N existe pas'}")
         all_exist = all_exist and exists
     
     return all_exist
