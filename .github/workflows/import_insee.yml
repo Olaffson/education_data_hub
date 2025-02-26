@@ -1,17 +1,13 @@
-name: "Import Gouv Data to Azure"
+name: "Import INSEE Data to Azure"
 
 on:
   workflow_dispatch:  # Déclenchement manuel
   schedule:
     - cron: '0 0 1 * *'  # Le 1er de chaque mois à minuit (00:00)
-    # OU
-    # - cron: '0 8 1 * *'  # Le 1er de chaque mois à 8h00
-    # OU
-    # - cron: '0 0 15 * *'  # Le 15 de chaque mois à minuit
 
 jobs:
   check-and-import:
-    name: "Check and Import Data from data.gouv.fr"
+    name: "Check and Import Data from INSEE"
     runs-on: ubuntu-latest
 
     env:
@@ -40,7 +36,7 @@ jobs:
 
       - name: 📥 Import Data
         id: import
-        run: python import_data_gouv.py
+        run: python import_insee.py
 
       - name: 📋 Check Import Status
         id: check
