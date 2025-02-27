@@ -27,10 +27,18 @@ jobs:
           pip install -r prod/import/requirements.txt
           pip install pytest pylint black isort
 
-      - name: 🎨 Vérification du formatage (Black)
+      - name: 🎨 Correction automatique du formatage (Black)
+        run: |
+          black prod/import/
+
+      - name: 📋 Vérification du formatage (Black)
         run: |
           black --check prod/import/
 
+      - name: 📌 Correction automatique des imports (isort)
+        run: |
+          isort prod/import/
+        
       - name: 📋 Vérification des imports (isort)
         run: |
           isort --check-only prod/import/

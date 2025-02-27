@@ -1,5 +1,6 @@
 import logging
-from azure_upload import upload_from_url, get_blob_list, check_blob_exists
+
+from azure_upload import check_blob_exists, get_blob_list, upload_from_url
 
 # Configuration du logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

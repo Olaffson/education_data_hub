@@ -1,5 +1,7 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
+
 from src.import_data_opendatasoft import check_files_exist, fetch_json_data, main, upload_json_to_azure
 
 

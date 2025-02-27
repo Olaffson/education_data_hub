@@ -1,7 +1,9 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
 from azure.core.exceptions import AzureError
-from src.azure_upload import upload_json_to_azure, upload_from_url, check_blob_exists, get_blob_list
+
+from src.azure_upload import check_blob_exists, get_blob_list, upload_from_url, upload_json_to_azure
 
 
 @pytest.fixture

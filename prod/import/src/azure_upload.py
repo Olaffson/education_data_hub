@@ -1,9 +1,10 @@
-import requests
-import logging
-from azure.storage.blob import BlobServiceClient
-from azure.identity import DefaultAzureCredential
-from azure.core.exceptions import AzureError
 import json
+import logging
+
+import requests
+from azure.core.exceptions import AzureError
+from azure.identity import DefaultAzureCredential
+from azure.storage.blob import BlobServiceClient
 
 # Configuration du logging
 logger = logging.getLogger(__name__)

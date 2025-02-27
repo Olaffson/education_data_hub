@@ -1,7 +1,9 @@
-import pytest
-from unittest.mock import patch, MagicMock
-from src.import_data_gouv import check_files_exist, main
 import os
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from src.import_data_gouv import check_files_exist, main
 
 
 def test_check_files_exist():
