@@ -12,10 +12,11 @@ pip install -r requirements.txt
 
 ## Structure des fichiers
 
-- `azure_upload.py` : Module principal pour l'interaction avec Azure Blob Storage
-- `import_insee.py` : Import des données INSEE
-- `import_data_gouv.py` : Import des données data.gouv.fr
-- `import_data_opendatasoft.py` : Import des données OpenDataSoft
+- `src/azure_upload.py` : Module principal pour l'interaction avec Azure Blob Storage
+- `src/import_insee.py` : Import des données INSEE
+- `src/import_data_gouv.py` : Import des données data.gouv.fr
+- `src/import_data_opendatasoft.py` : Import des données OpenDataSoft
+- `tests/` : Dossier contenant les tests unitaires pour chaque module
 
 ## Configuration Azure
 
@@ -43,9 +44,9 @@ Les scripts utilisent Azure DefaultAzureCredential pour l'authentification. Assu
 Chaque script peut être exécuté individuellement :
 
 ```bash
-python import_insee.py
-python import_data_gouv.py
-python import_data_opendatasoft.py
+python src/import_insee.py
+python src/import_data_gouv.py
+python src/import_data_opendatasoft.py
 ```
 
 ## Fonctionnalités communes
