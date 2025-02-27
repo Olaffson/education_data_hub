@@ -16,8 +16,7 @@ CONTAINER_NAME = "raw"
 try:
     credential = DefaultAzureCredential()
     blob_service_client = BlobServiceClient(
-        f"https://{STORAGE_ACCOUNT_NAME}.blob.core.windows.net/",
-        credential=credential
+        f"https://{STORAGE_ACCOUNT_NAME}.blob.core.windows.net/", credential=credential
     )
     container_client = blob_service_client.get_container_client(CONTAINER_NAME)
 except AzureError as e:
@@ -32,7 +31,7 @@ def upload_json_to_azure(json_data, destination_folder, file_name):
     try:
         logger.info(f"Préparation du JSON pour upload vers {destination_folder}/{file_name}")
         json_content = json.dumps(json_data, ensure_ascii=False, indent=4).encode("utf-8")
-        
+
         blob_name = f"{destination_folder}/{file_name}"
         blob_client = container_client.get_blob_client(blob_name)
 
@@ -46,6 +45,7 @@ def upload_json_to_azure(json_data, destination_folder, file_name):
     except Exception as e:
         logger.error(f"❌ Erreur inattendue lors de l'upload: {str(e)}")
         raise
+
 
 def upload_from_url(file_url, destination_folder, file_name):
     """
@@ -73,6 +73,7 @@ def upload_from_url(file_url, destination_folder, file_name):
         logger.error(f"❌ Erreur inattendue: {str(e)}")
         raise
 
+
 def check_blob_exists(destination_folder, file_name):
     """
     Vérifie si un blob existe déjà dans le container.
@@ -84,6 +85,7 @@ def check_blob_exists(destination_folder, file_name):
     except AzureError as e:
         logger.error(f"Erreur lors de la vérification du blob {blob_name}: {str(e)}")
         raise
+
 
 def get_blob_list(prefix):
     """

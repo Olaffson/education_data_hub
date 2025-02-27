@@ -4,7 +4,7 @@ import requests
 from azure_upload import upload_json_to_azure, get_blob_list, check_blob_exists
 
 # Configuration du logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Dossier dans Azure Blob
@@ -21,8 +21,9 @@ urls = [
     "https://data.opendatasoft.com/api/explore/v2.1/catalog/datasets/lycees-donnees-generales@datailedefrance/records?limit=100&offset=500",
     "https://data.opendatasoft.com/api/explore/v2.1/catalog/datasets/lycees-donnees-generales@datailedefrance/records?limit=100&offset=600",
     "https://data.opendatasoft.com/api/explore/v2.1/catalog/datasets/lycees-donnees-generales@datailedefrance/records?limit=100&offset=700",
-    "https://data.opendatasoft.com/api/explore/v2.1/catalog/datasets/lycees-donnees-generales@datailedefrance/records?limit=100&offset=800"
+    "https://data.opendatasoft.com/api/explore/v2.1/catalog/datasets/lycees-donnees-generales@datailedefrance/records?limit=100&offset=800",
 ]
+
 
 def check_files_exist():
     """
@@ -33,6 +34,7 @@ def check_files_exist():
     exists = blob_path in existing_blobs
     logger.info(f"Fichier {OUTPUT_FILENAME}: {'Existe' if exists else 'N existe pas'}")
     return exists
+
 
 def fetch_json_data(api_url):
     """
@@ -54,12 +56,13 @@ def fetch_json_data(api_url):
         logger.error(f"❌ Erreur inattendue: {str(e)}")
         raise
 
+
 def main():
     # Vérifier si le fichier existe déjà
     if check_files_exist():
         logger.info("Le fichier existe déjà. Arrêt de l'import.")
-        with open('skip_import', 'w') as f:
-            f.write('true')
+        with open("skip_import", "w") as f:
+            f.write("true")
         return
 
     logger.info("Début de l'import des données OpenDataSoft")
@@ -80,14 +83,12 @@ def main():
         raise Exception(f"L'import s'est terminé avec {error_count} erreurs")
 
     # Créer et uploader le JSON combiné
-    combined_data = {
-        "total_count": len(all_results),
-        "results": all_results
-    }
+    combined_data = {"total_count": len(all_results), "results": all_results}
 
     logger.info(f"Upload du fichier combiné avec {len(all_results)} enregistrements")
     upload_json_to_azure(combined_data, DESTINATION_FOLDER, OUTPUT_FILENAME)
     logger.info("Import terminé avec succès")
+
 
 if __name__ == "__main__":
     main()
