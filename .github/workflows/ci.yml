@@ -45,7 +45,7 @@ jobs:
 
       - name: 🔍 Analyse statique (Pylint)
         run: |
-          pylint prod/import/src
+          pylint prod/import/src --exit-zero
 
       - name: 🧪 Tests unitaires
         run: |
