@@ -1,3 +1,7 @@
+"""
+Module principal pour l'interaction avec Azure Blob Storage
+"""
+
 import json
 import logging
 
@@ -7,6 +11,7 @@ from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient
 
 # Configuration du logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Configuration Azure Storage
@@ -20,8 +25,8 @@ try:
         f"https://{STORAGE_ACCOUNT_NAME}.blob.core.windows.net/", credential=credential
     )
     container_client = blob_service_client.get_container_client(CONTAINER_NAME)
-except AzureError as e:
-    logger.error(f"Erreur d'initialisation Azure: {str(e)}")
+except AzureError as error:
+    logger.error("Erreur d'initialisation Azure: %s", str(error))
     raise
 
 
@@ -30,21 +35,21 @@ def upload_json_to_azure(json_data, destination_folder, file_name):
     Upload un JSON directement sur Azure Blob Storage depuis un objet Python.
     """
     try:
-        logger.info(f"Préparation du JSON pour upload vers {destination_folder}/{file_name}")
+        logger.info("Préparation du JSON pour upload vers %s/%s", destination_folder, file_name)
         json_content = json.dumps(json_data, ensure_ascii=False, indent=4).encode("utf-8")
 
         blob_name = f"{destination_folder}/{file_name}"
         blob_client = container_client.get_blob_client(blob_name)
 
-        logger.info(f"Upload vers {blob_name}")
+        logger.info("Upload vers %s", blob_name)
         blob_client.upload_blob(json_content, overwrite=True)
-        logger.info(f"✅ JSON uploadé avec succès: {blob_name}")
+        logger.info("✅ JSON uploadé avec succès: %s", blob_name)
 
-    except AzureError as e:
-        logger.error(f"❌ Erreur Azure lors de l'upload: {str(e)}")
+    except AzureError as error:
+        logger.error("❌ Erreur Azure lors de l'upload: %s", str(error))
         raise
-    except Exception as e:
-        logger.error(f"❌ Erreur inattendue lors de l'upload: {str(e)}")
+    except Exception as error:
+        logger.error("❌ Erreur inattendue lors de l'upload: %s", str(error))
         raise
 
 

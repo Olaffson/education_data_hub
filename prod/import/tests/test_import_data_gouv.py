@@ -1,4 +1,7 @@
-import os
+"""
+Tests pour le module import_data_gouv
+"""
+
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -7,6 +10,9 @@ from src.import_data_gouv import check_files_exist, main
 
 
 def test_check_files_exist():
+    """
+    Test de la fonction check_files_exist
+    """
     with patch("src.import_data_gouv.get_blob_list") as mock_get_blobs:
         mock_get_blobs.return_value = ["data_gouv/ips_lycee.csv", "data_gouv/bac_par_academie.csv"]
         assert check_files_exist() == False  # Car tous les fichiers ne sont pas présents
@@ -37,12 +43,18 @@ def mock_upload():
 
 # ✅ Test `check_files_exist()` avec un blob vide
 def test_check_files_exist_empty(mock_get_blobs):
+    """
+    Test de la fonction check_files_exist avec un blob vide
+    """
     mock_get_blobs.return_value = []  # Aucun fichier existant
     assert check_files_exist() is False
 
 
 # ✅ Test `check_files_exist()` lorsque tous les fichiers existent
 def test_check_files_exist_all_files_present(mock_get_blobs):
+    """
+    Test de la fonction check_files_exist avec tous les fichiers présents
+    """
     mock_get_blobs.return_value = [
         "data_gouv/ips_lycee.csv",
         "data_gouv/bac_par_academie.csv",
@@ -56,6 +68,9 @@ def test_check_files_exist_all_files_present(mock_get_blobs):
 # ✅ Test `main()` lorsque tous les fichiers existent déjà
 @patch("builtins.open", new_callable=MagicMock)
 def test_main_no_action(mock_open, mock_get_blobs, mock_upload):
+    """
+    Test de la fonction main lorsque tous les fichiers existent déjà
+    """
     mock_get_blobs.return_value = [
         "data_gouv/ips_lycee.csv",
         "data_gouv/bac_par_academie.csv",
@@ -72,6 +87,9 @@ def test_main_no_action(mock_open, mock_get_blobs, mock_upload):
 
 # ✅ Test `main()` lorsque des fichiers sont absents et doivent être téléchargés
 def test_main_download_missing_files(mock_get_blobs, mock_upload):
+    """
+    Test de la fonction main lorsque des fichiers sont absents et doivent être téléchargés
+    """
     mock_get_blobs.return_value = ["data_gouv/ips_lycee.csv"]  # Seul un fichier existe
 
     main()
@@ -82,6 +100,9 @@ def test_main_download_missing_files(mock_get_blobs, mock_upload):
 
 # ✅ Test `main()` lorsque `upload_from_url()` lève une exception
 def test_main_upload_error(mock_get_blobs, mock_upload):
+    """
+    Test de la fonction main lorsque `upload_from_url()` lève une exception
+    """
     mock_get_blobs.return_value = []  # Aucun fichier existant
     mock_upload.side_effect = Exception("Erreur réseau")
 
@@ -91,6 +112,9 @@ def test_main_upload_error(mock_get_blobs, mock_upload):
 
 # ✅ Test `check_files_exist()` avec une erreur dans `get_blob_list()`
 def test_check_files_exist_get_blob_list_error(mock_get_blobs):
+    """
+    Test de la fonction check_files_exist avec une erreur dans `get_blob_list()`
+    """
     mock_get_blobs.side_effect = Exception("Erreur de connexion à Azure")
 
     with pytest.raises(Exception, match="Erreur de connexion à Azure"):

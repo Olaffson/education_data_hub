@@ -1,3 +1,7 @@
+"""
+Tests pour le module azure_upload
+"""
+
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -8,16 +12,25 @@ from src.azure_upload import check_blob_exists, get_blob_list, upload_from_url, 
 
 @pytest.fixture
 def mock_container_client():
+    """
+    Fixture pour le mock du container client
+    """
     return MagicMock()
 
 
 @pytest.fixture
 def mock_blob_client():
+    """
+    Fixture pour le mock du blob client
+    """
     return MagicMock()
 
 
 @patch("src.azure_upload.container_client")
 def test_upload_json_to_azure(mock_container_client):
+    """
+    Test de l'upload JSON vers Azure
+    """
     # Configurer le mock pour le blob client
     mock_blob_client = MagicMock()
     mock_container_client.get_blob_client.return_value = mock_blob_client
@@ -37,6 +50,9 @@ def test_upload_json_to_azure(mock_container_client):
 
 @patch("src.azure_upload.container_client")
 def test_upload_from_url(mock_container_client):
+    """
+    Test de l'upload depuis une URL
+    """
     # Configurer le mock pour le blob client
     mock_blob_client = MagicMock()
     mock_container_client.get_blob_client.return_value = mock_blob_client
@@ -59,6 +75,9 @@ def test_upload_from_url(mock_container_client):
 
 @patch("src.azure_upload.container_client")
 def test_check_blob_exists(mock_container_client):
+    """
+    Test de la vérification de l'existence d'un blob
+    """
     # Configurer le mock pour le blob client
     mock_blob_client = MagicMock()
     mock_container_client.get_blob_client.return_value = mock_blob_client
@@ -73,6 +92,9 @@ def test_check_blob_exists(mock_container_client):
 
 @patch("src.azure_upload.container_client")
 def test_get_blob_list(mock_container_client):
+    """
+    Test de la récupération de la liste des blobs
+    """
     # Configurer le mock pour list_blobs
     mock_blob1 = MagicMock()
     mock_blob1.name = "test_folder/file1.txt"
@@ -89,6 +111,9 @@ def test_get_blob_list(mock_container_client):
 # ✅ Test de l'upload JSON avec un fichier vide
 @patch("src.azure_upload.container_client")
 def test_upload_json_to_azure_empty_json(mock_container_client):
+    """
+    Test de l'upload JSON avec un fichier vide
+    """
     mock_blob_client = MagicMock()
     mock_container_client.get_blob_client.return_value = mock_blob_client
 
@@ -104,6 +129,9 @@ def test_upload_json_to_azure_empty_json(mock_container_client):
 # ✅ Test de l'upload JSON avec une erreur Azure
 @patch("src.azure_upload.container_client")
 def test_upload_json_to_azure_azure_error(mock_container_client):
+    """
+    Test de l'upload JSON avec une erreur Azure
+    """
     mock_blob_client = MagicMock()
     mock_blob_client.upload_blob.side_effect = AzureError("Erreur Azure")
     mock_container_client.get_blob_client.return_value = mock_blob_client
@@ -116,6 +144,9 @@ def test_upload_json_to_azure_azure_error(mock_container_client):
 @patch("src.azure_upload.container_client")
 @patch("src.azure_upload.requests.get")
 def test_upload_from_url_invalid_url(mock_requests_get, mock_container_client):
+    """
+    Test de l'upload depuis URL avec une URL invalide
+    """
     mock_requests_get.side_effect = Exception("Invalid URL")
 
     with pytest.raises(Exception, match="Invalid URL"):
@@ -126,6 +157,9 @@ def test_upload_from_url_invalid_url(mock_requests_get, mock_container_client):
 @patch("src.azure_upload.container_client")
 @patch("src.azure_upload.requests.get")
 def test_upload_from_url_azure_error(mock_requests_get, mock_container_client):
+    """
+    Test de l'upload depuis URL avec une erreur Azure
+    """
     mock_blob_client = MagicMock()
     mock_blob_client.upload_blob.side_effect = AzureError("Azure Storage Error")
     mock_container_client.get_blob_client.return_value = mock_blob_client
@@ -140,6 +174,9 @@ def test_upload_from_url_azure_error(mock_requests_get, mock_container_client):
 # ✅ Test `check_blob_exists()` quand le blob n'existe pas
 @patch("src.azure_upload.container_client")
 def test_check_blob_exists_not_found(mock_container_client):
+    """
+    Test `check_blob_exists()` quand le blob n'existe pas
+    """
     mock_blob_client = MagicMock()
     mock_blob_client.exists.return_value = False
     mock_container_client.get_blob_client.return_value = mock_blob_client
@@ -151,6 +188,9 @@ def test_check_blob_exists_not_found(mock_container_client):
 # ✅ Test `get_blob_list()` avec une liste vide
 @patch("src.azure_upload.container_client")
 def test_get_blob_list_empty(mock_container_client):
+    """
+    Test `get_blob_list()` avec une liste vide
+    """
     mock_container_client.list_blobs.return_value = []
 
     result = get_blob_list("empty_folder")

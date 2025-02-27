@@ -1,4 +1,8 @@
-from unittest.mock import MagicMock, patch
+"""
+Tests pour le module import_data_opendatasoft
+"""
+
+from unittest.mock import patch
 
 import pytest
 
@@ -6,6 +10,9 @@ from src.import_data_opendatasoft import check_files_exist, fetch_json_data, mai
 
 
 def test_fetch_json_data():
+    """
+    Test de la fonction fetch_json_data
+    """
     with patch("src.import_data_opendatasoft.requests.get") as mock_get:
         mock_get.return_value.json.return_value = {"results": [{"id": 1}]}
         results = fetch_json_data("http://test.com")
@@ -13,6 +20,9 @@ def test_fetch_json_data():
 
 
 def test_check_files_exist():
+    """
+    Test de la fonction check_files_exist
+    """
     with patch("src.import_data_opendatasoft.get_blob_list") as mock_get_blobs:
         mock_get_blobs.return_value = ["opendatasoft/lycees-donnees-generales-combine.json"]
         assert check_files_exist() == True
