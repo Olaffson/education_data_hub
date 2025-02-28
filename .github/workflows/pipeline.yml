@@ -16,9 +16,9 @@ jobs:
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
 
-    defaults:
-      run:
-        working-directory: ./prod/pipeline/src
+    # defaults:
+    #   run:
+    #     working-directory: ./prod/pipeline/src
 
     steps:
       - name: 🛎 Checkout Repository
