@@ -2,7 +2,7 @@ name: "Pipeline Data Cleaning"
 
 on:
   schedule:
-    - cron: "0 0 1 * *"  # Tous les jours à minuit
+    - cron: "0 0 1 * *"
   workflow_dispatch:  # Déclenchement manuel
 
 jobs:
