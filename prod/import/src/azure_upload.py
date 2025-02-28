@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # Configuration Azure Storage
-STORAGE_ACCOUNT_NAME = "sadatalakeokotwicaprod"  # Mettre à jour avec le nom correct
+STORAGE_ACCOUNT_NAME = "sadatalakeokotwicaprod"
 CONTAINER_NAME = "raw"
 
 # Utilisation des credentials du Service Principal

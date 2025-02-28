@@ -1,21 +1,34 @@
+import os
 import pandas as pd
 import io
 import logging
+from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient
 
-logger = logging.getLogger(__name__)
+# Configuration Azure à partir des secrets GitHub
+AZURE_CLIENT_ID = os.getenv("AZURE_CLIENT_ID")
+AZURE_CLIENT_SECRET = os.getenv("AZURE_CLIENT_SECRET")
+AZURE_TENANT_ID = os.getenv("AZURE_TENANT_ID")
+AZURE_STORAGE_ACCOUNT = "nom-du-storage-account"  # Remplace par le nom de ton compte Azure Storage
 
-# Configuration Azure
-AZURE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=xxx;AccountKey=xxx;EndpointSuffix=core.windows.net"
+# Authentification avec un Service Principal
+credential = DefaultAzureCredential()
+
+# Connexion au compte de stockage Azure
+blob_service_client = BlobServiceClient(
+    f"https://{AZURE_STORAGE_ACCOUNT}.blob.core.windows.net",
+    credential=credential
+)
+
+# Définition des conteneurs
 CONTAINER_RAW = "raw"
 CONTAINER_CLEANED = "cleaned"
 
-blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
+# Logger
+logger = logging.getLogger(__name__)
 
 def clean_csv_data(csv_data: bytes) -> bytes:
-    """
-    Nettoie un fichier CSV (suppression des lignes vides, doublons, normalisation des colonnes).
-    """
+    """ Nettoie un fichier CSV (suppression des lignes vides, doublons, normalisation des colonnes). """
     try:
         df = pd.read_csv(io.BytesIO(csv_data))
         df.dropna(inplace=True)
@@ -30,9 +43,7 @@ def clean_csv_data(csv_data: bytes) -> bytes:
         raise
 
 def clean_json_data(json_data: bytes) -> bytes:
-    """
-    Nettoie un fichier JSON (suppression des clés vides, formatage correct).
-    """
+    """ Nettoie un fichier JSON (suppression des clés vides, formatage correct). """
     try:
         df = pd.read_json(io.BytesIO(json_data))
         df.dropna(inplace=True)
@@ -46,9 +57,7 @@ def clean_json_data(json_data: bytes) -> bytes:
         raise
 
 def clean_excel_data(excel_data: bytes) -> bytes:
-    """
-    Nettoie un fichier Excel (suppression des lignes vides, doublons).
-    """
+    """ Nettoie un fichier Excel (suppression des lignes vides, doublons). """
     try:
         df = pd.read_excel(io.BytesIO(excel_data))
         df.dropna(inplace=True)
@@ -63,7 +72,8 @@ def clean_excel_data(excel_data: bytes) -> bytes:
 
 def process_files():
     """
-    Récupère les fichiers du conteneur `raw`, applique un nettoyage et les déplace vers `cleaned`.
+    Récupère les fichiers du conteneur `raw`, applique un nettoyage et les déplace vers `cleaned`,
+    tout en conservant la structure des dossiers.
     """
     raw_container = blob_service_client.get_container_client(CONTAINER_RAW)
     cleaned_container = blob_service_client.get_container_client(CONTAINER_CLEANED)
