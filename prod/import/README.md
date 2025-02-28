@@ -75,9 +75,9 @@ Les logs incluent :
 
 Les scripts d'import sont automatisés via des workflows GitHub Actions :
 
-- Import quotidien des données INSEE (tous les jours à 02:00 UTC)
-- Import hebdomadaire des données data.gouv.fr (tous les lundis à 03:00 UTC)
-- Import mensuel des données OpenDataSoft (le 1er du mois à 04:00 UTC)
+- Import mensuel des données INSEE (le 1er du mois à 00:00 UTC)
+- Import mensuel des données data.gouv.fr (le 1er du mois à 00:00 UTC)
+- Import mensuel des données OpenDataSoft (le 1er du mois à 00:00 UTC)
 
 Les workflows :
 - Vérifient l'existence des données avant l'import
