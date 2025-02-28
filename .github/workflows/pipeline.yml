@@ -33,4 +33,4 @@ jobs:
         run: az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
 
       - name: 🚀 Exécuter le pipeline
-        run: python src/pipeline.py
+        run: python prod/pipeline/src/pipeline.py
