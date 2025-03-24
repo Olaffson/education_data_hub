@@ -207,7 +207,7 @@ resource "azurerm_data_factory_trigger_blob_event" "raw_trigger" {
 
   events = ["Microsoft.Storage.BlobCreated"]
 
-  blob_path_begins_with = ""
+  blob_path_begins_with = "${azurerm_storage_container.raw.name}/"
   blob_path_ends_with   = ""
 
   pipeline {
