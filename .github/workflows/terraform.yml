@@ -3,7 +3,8 @@ name: "Terraform Deploy to Azure"
 on:
   push:
     branches:
-      - main  # Déclenchement sur push dans main
+      - main
+      - dev
   pull_request:
     branches:
       - main
