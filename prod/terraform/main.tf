@@ -73,7 +73,7 @@ resource "azurerm_data_factory_dataset_delimited_text" "raw_dataset" {
 
   azure_blob_storage_location {
     container = azurerm_storage_container.raw.name
-    path      = "data"
+    path      = "data_gouv"
     filename  = "*.csv"
   }
 
@@ -93,7 +93,7 @@ resource "azurerm_data_factory_dataset_delimited_text" "cleaned_dataset" {
 
   azure_blob_storage_location {
     container = azurerm_storage_container.cleaned.name
-    path      = "data"
+    path      = "data_gouv"
     filename  = "cleaned_{timestamp}.csv"
   }
 
