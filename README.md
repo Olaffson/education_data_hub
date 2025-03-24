@@ -1,5 +1,6 @@
 # education_data_hub
 
+```mermaid	
 graph TD
     subgraph Azure Data Factory
     ADF[ADF] --> LinkedService[Linked Service: DataLake]
@@ -12,3 +13,4 @@ graph TD
 
     Raw -->|Lecture| raw_data[(raw/data_gouv/*.csv)]
     Cleaned -->|Écriture| cleaned_data[(cleaned/data_gouv/cleaned_<timestamp>.csv)]
+```
