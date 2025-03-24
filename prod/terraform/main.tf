@@ -77,7 +77,7 @@ resource "azurerm_data_factory_dataset_delimited_text" "raw_dataset" {
     filename  = "*.csv"
   }
 
-  column_delimiter    = ","
+  column_delimiter    = ";"
   row_delimiter       = "NEW_LINE"
   encoding            = "UTF-8"
   quote_character     = "\""
@@ -97,7 +97,7 @@ resource "azurerm_data_factory_dataset_delimited_text" "cleaned_dataset" {
     filename  = "cleaned_{timestamp}.csv"
   }
 
-  column_delimiter    = ","
+  column_delimiter    = ";"
   row_delimiter       = "NEW_LINE"
   encoding            = "UTF-8"
   quote_character     = "\""
