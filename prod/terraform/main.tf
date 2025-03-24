@@ -78,7 +78,7 @@ resource "azurerm_data_factory_dataset_delimited_text" "raw_dataset" {
   }
 
   column_delimiter    = ";"
-  row_delimiter       = "NEW_LINE"
+  row_delimiter       = "\n"
   encoding            = "UTF-8"
   quote_character     = "\""
   escape_character    = "\\"
@@ -98,7 +98,7 @@ resource "azurerm_data_factory_dataset_delimited_text" "cleaned_dataset" {
   }
 
   column_delimiter    = ";"
-  row_delimiter       = "NEW_LINE"
+  row_delimiter       = "\n"
   encoding            = "UTF-8"
   quote_character     = "\""
   escape_character    = "\\"
