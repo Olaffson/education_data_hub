@@ -36,3 +36,19 @@ resource "azurerm_storage_container" "tables" {
   storage_account_id    = azurerm_storage_account.datalake.id
   container_access_type = "private"
 }
+
+# Création de la Data Factory
+resource "azurerm_data_factory" "adf" {
+  name                = var.data_factory_name
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  tags = {
+    environment = "prod"
+    managed_by  = "terraform"
+  }
+}

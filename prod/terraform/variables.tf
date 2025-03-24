@@ -15,3 +15,9 @@ variable "storage_account_name" {
   type        = string
   default     = "sadatalakeokotwicaprod"
 }
+
+variable "data_factory_name" {
+  description = "Nom de la Data Factory"
+  type        = string
+  default     = "adf-okotwica-prod"
+}
