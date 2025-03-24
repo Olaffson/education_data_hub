@@ -90,7 +90,7 @@ resource "azurerm_data_factory_dataset_delimited_text" "csv_dataset" {
 }
 
 # Excel Dataset - raw/insee/*.xlsx
-resource "azurerm_data_factory_dataset_excel" "excel_dataset" {
+resource "azurerm_data_factory_dataset_binary" "excel_dataset" {
   name                = "ExcelDataset"
   data_factory_id     = azurerm_data_factory.adf.id
   linked_service_name = azurerm_data_factory_linked_service_data_lake_storage_gen2.datalake.name
@@ -100,9 +100,6 @@ resource "azurerm_data_factory_dataset_excel" "excel_dataset" {
     path      = "insee"
     filename  = "*.xlsx"
   }
-
-  sheet_name          = "Feuil1"
-  first_row_as_header = true
 }
 
 # JSON Dataset - raw/opendatasoft/*.json
@@ -177,7 +174,7 @@ resource "azurerm_data_factory_pipeline" "universal_parquet_pipeline" {
     {
       name    = "CopyExcel",
       type    = "Copy",
-      inputs  = [{ referenceName = azurerm_data_factory_dataset_excel.excel_dataset.name, type = "DatasetReference" }],
+      inputs  = [{ referenceName = azurerm_data_factory_dataset_binary.excel_dataset.name, type = "DatasetReference" }],
       outputs = [{ referenceName = azurerm_data_factory_dataset_parquet.parquet_output.name, type = "DatasetReference" }],
       typeProperties = {
         source = {
