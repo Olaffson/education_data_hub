@@ -201,8 +201,8 @@ resource "azurerm_data_factory_pipeline" "universal_parquet_pipeline" {
 # -----------------------------
 
 resource "azurerm_data_factory_trigger_blob_event" "raw_trigger" {
-  name            = "TriggerOnRawFiles"
-  data_factory_id = azurerm_data_factory.adf.id
+  name               = "TriggerOnRawFiles"
+  data_factory_id    = azurerm_data_factory.adf.id
   storage_account_id = azurerm_storage_account.datalake.id
 
   events = ["Microsoft.Storage.BlobCreated"]
