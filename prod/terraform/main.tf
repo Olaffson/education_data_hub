@@ -140,14 +140,8 @@ resource "azurerm_data_factory_pipeline" "universal_parquet_pipeline" {
   data_factory_id = azurerm_data_factory.adf.id
 
   parameters = {
-    outputPath = {
-      type          = "String"
-      default_value = "default"
-    }
-    outputName = {
-      type          = "String"
-      default_value = "default.parquet"
-    }
+    "outputPath" = "default"
+    "outputName" = "default.parquet"
   }
 
   activities_json = jsonencode([
@@ -165,11 +159,7 @@ resource "azurerm_data_factory_pipeline" "universal_parquet_pipeline" {
           type          = "ParquetSink",
           storeSettings = { type = "AzureBlobFSWriteSettings" }
         }
-      },
-      linkedServiceName = null,
-      policy            = {},
-      userProperties    = [],
-      dependsOn         = []
+      }
     },
     {
       name    = "CopyExcel",
