@@ -65,9 +65,13 @@ resource "azurerm_data_factory_linked_service_data_lake_storage_gen2" "datalake"
   use_managed_identity = true
 }
 
-# Dataset source pour les fichiers bruts
-resource "azurerm_data_factory_dataset_delimited_text" "raw_dataset" {
-  name                = "RawDataset"
+# -----------------------------
+# 1. DATASETS SOURCES
+# -----------------------------
+
+# CSV Dataset - raw/data_gouv/*.csv
+resource "azurerm_data_factory_dataset_delimited_text" "csv_dataset" {
+  name                = "CsvDataset"
   data_factory_id     = azurerm_data_factory.adf.id
   linked_service_name = azurerm_data_factory_linked_service_data_lake_storage_gen2.datalake.name
 
@@ -85,60 +89,150 @@ resource "azurerm_data_factory_dataset_delimited_text" "raw_dataset" {
   first_row_as_header = true
 }
 
-# Dataset destination pour les fichiers nettoyés
-resource "azurerm_data_factory_dataset_delimited_text" "cleaned_dataset" {
-  name                = "CleanedDataset"
+# Excel Dataset - raw/insee/*.xlsx
+resource "azurerm_data_factory_dataset_excel" "excel_dataset" {
+  name                = "ExcelDataset"
+  data_factory_id     = azurerm_data_factory.adf.id
+  linked_service_name = azurerm_data_factory_linked_service_data_lake_storage_gen2.datalake.name
+
+  azure_blob_storage_location {
+    container = azurerm_storage_container.raw.name
+    path      = "insee"
+    filename  = "*.xlsx"
+  }
+
+  sheet_name          = "Feuil1"
+  first_row_as_header = true
+}
+
+# JSON Dataset - raw/opendatasoft/*.json
+resource "azurerm_data_factory_dataset_json" "json_dataset" {
+  name                = "JsonDataset"
+  data_factory_id     = azurerm_data_factory.adf.id
+  linked_service_name = azurerm_data_factory_linked_service_data_lake_storage_gen2.datalake.name
+
+  azure_blob_storage_location {
+    container = azurerm_storage_container.raw.name
+    path      = "opendatasoft"
+    filename  = "*.json"
+  }
+}
+
+# -----------------------------
+# 2. DATASET PARQUET DESTINATION
+# -----------------------------
+
+resource "azurerm_data_factory_dataset_parquet" "parquet_output" {
+  name                = "ParquetOutput"
   data_factory_id     = azurerm_data_factory.adf.id
   linked_service_name = azurerm_data_factory_linked_service_data_lake_storage_gen2.datalake.name
 
   azure_blob_storage_location {
     container = azurerm_storage_container.cleaned.name
-    path      = "data_gouv"
-    filename  = "cleaned_{timestamp}.csv"
+    path      = "@{pipeline().parameters.outputPath}"
+    filename  = "@{pipeline().parameters.outputName}"
   }
-
-  column_delimiter    = ";"
-  row_delimiter       = "\n"
-  encoding            = "UTF-8"
-  quote_character     = "\""
-  escape_character    = "\\"
-  first_row_as_header = true
 }
 
-# Pipeline de nettoyage des données
-resource "azurerm_data_factory_pipeline" "cleaning_pipeline" {
-  name            = "DataCleaningPipeline"
+# -----------------------------
+# 3. PIPELINE with 3 activities
+# -----------------------------
+
+resource "azurerm_data_factory_pipeline" "universal_parquet_pipeline" {
+  name            = "UniversalConvertToParquet"
   data_factory_id = azurerm_data_factory.adf.id
+
+  parameters = {
+    outputPath = {
+      type          = "String"
+      default_value = "default"
+    }
+    outputName = {
+      type          = "String"
+      default_value = "default.parquet"
+    }
+  }
 
   activities_json = jsonencode([
     {
-      name = "CopyData",
-      type = "Copy",
-      inputs = [{
-        referenceName = azurerm_data_factory_dataset_delimited_text.raw_dataset.name,
-        type          = "DatasetReference"
-      }],
-      outputs = [{
-        referenceName = azurerm_data_factory_dataset_delimited_text.cleaned_dataset.name,
-        type          = "DatasetReference"
-      }],
+      name    = "CopyCsv",
+      type    = "Copy",
+      inputs  = [{ referenceName = azurerm_data_factory_dataset_delimited_text.csv_dataset.name, type = "DatasetReference" }],
+      outputs = [{ referenceName = azurerm_data_factory_dataset_parquet.parquet_output.name, type = "DatasetReference" }],
       typeProperties = {
         source = {
-          type = "DelimitedTextSource",
-          storeSettings = {
-            type      = "AzureBlobFSReadSettings",
-            recursive = true
-          }
+          type          = "DelimitedTextSource",
+          storeSettings = { type = "AzureBlobFSReadSettings", recursive = true }
         },
         sink = {
-          type = "DelimitedTextSink",
-          storeSettings = {
-            type = "AzureBlobFSWriteSettings"
-          }
+          type          = "ParquetSink",
+          storeSettings = { type = "AzureBlobFSWriteSettings" }
+        }
+      },
+      linkedServiceName = null,
+      policy            = {},
+      userProperties    = [],
+      dependsOn         = []
+    },
+    {
+      name    = "CopyExcel",
+      type    = "Copy",
+      inputs  = [{ referenceName = azurerm_data_factory_dataset_excel.excel_dataset.name, type = "DatasetReference" }],
+      outputs = [{ referenceName = azurerm_data_factory_dataset_parquet.parquet_output.name, type = "DatasetReference" }],
+      typeProperties = {
+        source = {
+          type          = "ExcelSource",
+          storeSettings = { type = "AzureBlobFSReadSettings", recursive = true }
+        },
+        sink = {
+          type          = "ParquetSink",
+          storeSettings = { type = "AzureBlobFSWriteSettings" }
+        }
+      }
+    },
+    {
+      name    = "CopyJson",
+      type    = "Copy",
+      inputs  = [{ referenceName = azurerm_data_factory_dataset_json.json_dataset.name, type = "DatasetReference" }],
+      outputs = [{ referenceName = azurerm_data_factory_dataset_parquet.parquet_output.name, type = "DatasetReference" }],
+      typeProperties = {
+        source = {
+          type          = "JsonSource",
+          storeSettings = { type = "AzureBlobFSReadSettings", recursive = true }
+        },
+        sink = {
+          type          = "ParquetSink",
+          storeSettings = { type = "AzureBlobFSWriteSettings" }
         }
       }
     }
   ])
+}
+
+# -----------------------------
+# 4. EVENT TRIGGER AUTOMATIQUE
+# -----------------------------
+
+resource "azurerm_data_factory_trigger_blob_event" "raw_trigger" {
+  name            = "TriggerOnRawFiles"
+  data_factory_id = azurerm_data_factory.adf.id
+
+  events = ["Microsoft.Storage.BlobCreated"]
+
+  blob_path_begins_with = ""
+  blob_path_ends_with   = ""
+
+  storage_account_id = azurerm_storage_account.datalake.id
+  scope              = "/subscriptions/${var.subscription_id}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.Storage/storageAccounts/${azurerm_storage_account.datalake.name}/blobServices/default/containers/${azurerm_storage_container.raw.name}"
+
+  pipeline {
+    name = azurerm_data_factory_pipeline.universal_parquet_pipeline.name
+
+    parameters = {
+      outputPath = "@{triggerBody().folderPath}"
+      outputName = "@{replace(triggerBody().fileName, split(triggerBody().fileName, '.')[length(split(triggerBody().fileName, '.')) - 1], 'parquet')}"
+    }
+  }
 }
 
 # Attribution du rôle Storage Blob Data Contributor à la Data Factory
@@ -147,3 +241,4 @@ resource "azurerm_role_assignment" "adf_storage_contributor" {
   role_definition_name = "Storage Blob Data Contributor"
   principal_id         = azurerm_data_factory.adf.identity[0].principal_id
 }
+
