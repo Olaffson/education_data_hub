@@ -203,18 +203,15 @@ resource "azurerm_data_factory_pipeline" "universal_parquet_pipeline" {
 resource "azurerm_data_factory_trigger_blob_event" "raw_trigger" {
   name            = "TriggerOnRawFiles"
   data_factory_id = azurerm_data_factory.adf.id
+  storage_account_id = azurerm_storage_account.datalake.id
 
   events = ["Microsoft.Storage.BlobCreated"]
 
   blob_path_begins_with = ""
   blob_path_ends_with   = ""
 
-  storage_account_id = azurerm_storage_account.datalake.id
-  scope              = "/subscriptions/${var.subscription_id}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.Storage/storageAccounts/${azurerm_storage_account.datalake.name}/blobServices/default/containers/${azurerm_storage_container.raw.name}"
-
   pipeline {
     name = azurerm_data_factory_pipeline.universal_parquet_pipeline.name
-
     parameters = {
       outputPath = "@{triggerBody().folderPath}"
       outputName = "@{replace(triggerBody().fileName, split(triggerBody().fileName, '.')[length(split(triggerBody().fileName, '.')) - 1], 'parquet')}"
