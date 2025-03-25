@@ -214,7 +214,7 @@ resource "azurerm_data_factory_trigger_blob_event" "raw_trigger" {
     name = azurerm_data_factory_pipeline.universal_parquet_pipeline.name
     parameters = {
       outputPath = "@{triggerBody().folderPath}"
-      outputName = "@{replace(triggerBody().fileName, split(triggerBody().fileName, '.')[length(split(triggerBody().fileName, '.')) - 1], 'parquet')}"
+      outputName = "@{replace(triggerBody().fileName, '\\.[^.]+$', '.parquet')}"
     }
   }
 }
