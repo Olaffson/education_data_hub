@@ -65,16 +65,19 @@ resource "azurerm_data_factory_linked_service_data_lake_storage_gen2" "datalake"
   use_managed_identity = true
 }
 
-# -----------------------------
-# 1. DATASETS SOURCES
-# -----------------------------
+# Attribution du rôle Storage Blob Data Contributor à la Data Factory
+resource "azurerm_role_assignment" "adf_storage_contributor" {
+  scope                = azurerm_storage_account.datalake.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_data_factory.adf.identity[0].principal_id
+}
 
-# CSV Dataset - raw/data_gouv/*.csv
-resource "azurerm_data_factory_dataset_delimited_text" "csv_dataset" {
-  name                = "CsvDataset"
+# Dataset source pour les fichiers CSV de data_gouv
+resource "azurerm_data_factory_dataset_delimited_text" "data_gouv_csv" {
+  name                = "DataGouvCsvDataset"
   data_factory_id     = azurerm_data_factory.adf.id
   linked_service_name = azurerm_data_factory_linked_service_data_lake_storage_gen2.datalake.name
-
+  
   azure_blob_storage_location {
     container = azurerm_storage_container.raw.name
     path      = "data_gouv"
@@ -82,73 +85,68 @@ resource "azurerm_data_factory_dataset_delimited_text" "csv_dataset" {
   }
 
   column_delimiter    = ";"
-  row_delimiter       = "\n"
-  encoding            = "UTF-8"
-  quote_character     = "\""
-  escape_character    = "\\"
+  row_delimiter      = "\n"
+  encoding           = "UTF-8"
+  quote_character    = "\""
+  escape_character   = "\\"
   first_row_as_header = true
 }
 
-# -----------------------------
-# 2. DATASET PARQUET DESTINATION
-# -----------------------------
-
-resource "azurerm_data_factory_dataset_parquet" "parquet_output" {
-  name                = "ParquetOutput"
+# Dataset destination pour les fichiers Parquet
+resource "azurerm_data_factory_dataset_parquet" "data_gouv_parquet" {
+  name                = "DataGouvParquetDataset"
   data_factory_id     = azurerm_data_factory.adf.id
   linked_service_name = azurerm_data_factory_linked_service_data_lake_storage_gen2.datalake.name
 
-  parameters = {
-    outputPath = ""
-    outputName = ""
-  }
-
-
   azure_blob_storage_location {
     container = azurerm_storage_container.cleaned.name
-    path      = "@dataset().outputPath"
-    filename  = "@dataset().outputName"
+    path      = "data_gouv"
   }
+
+  compression_codec = "snappy"
 }
 
-# -----------------------------
-# 3. PIPELINE with 3 activities
-# -----------------------------
-
-resource "azurerm_data_factory_pipeline" "universal_parquet_pipeline" {
-  name            = "UniversalConvertToParquet"
+# Pipeline de conversion CSV vers Parquet
+resource "azurerm_data_factory_pipeline" "csv_to_parquet_pipeline" {
+  name            = "DataGouvCsvToParquet"
   data_factory_id = azurerm_data_factory.adf.id
-
-  parameters = {
-    outputPath = "default"
-    outputName = "default.parquet"
-  }
 
   activities_json = jsonencode([
     {
-      name    = "CopyCsv",
-      type    = "Copy",
-      inputs  = [{ referenceName = azurerm_data_factory_dataset_delimited_text.csv_dataset.name, type = "DatasetReference" }],
-      outputs = [{ referenceName = azurerm_data_factory_dataset_parquet.parquet_output.name, type = "DatasetReference" }],
+      name = "CsvToParquet",
+      type = "Copy",
+      inputs = [{
+        referenceName = azurerm_data_factory_dataset_delimited_text.data_gouv_csv.name,
+        type = "DatasetReference"
+      }],
+      outputs = [{
+        referenceName = azurerm_data_factory_dataset_parquet.data_gouv_parquet.name,
+        type = "DatasetReference"
+      }],
       typeProperties = {
         source = {
-          type          = "DelimitedTextSource",
-          storeSettings = { type = "AzureBlobFSReadSettings", recursive = true }
+          type = "DelimitedTextSource",
+          storeSettings = {
+            type = "AzureBlobFSReadSettings",
+            recursive = true,
+            wildcardFileName = "*.csv"
+          }
         },
         sink = {
-          type          = "ParquetSink",
-          storeSettings = { type = "AzureBlobFSWriteSettings" }
+          type = "ParquetSink",
+          storeSettings = {
+            type = "AzureBlobFSWriteSettings"
+          },
+          formatSettings = {
+            type = "ParquetWriteSettings"
+          }
         }
       }
     }
   ])
 }
 
-# -----------------------------
-# 4. EVENT TRIGGER AUTOMATIQUE
-# -----------------------------
-
-# probleme sur la creation du trigger, blob_path_begins_with et scope sont inutilisables
+# Trigger pour surveiller les nouveaux fichiers CSV
 resource "azurerm_data_factory_trigger_blob_event" "trigger_data_gouv" {
   name               = "TriggerDataGouv"
   data_factory_id    = azurerm_data_factory.adf.id
@@ -156,22 +154,10 @@ resource "azurerm_data_factory_trigger_blob_event" "trigger_data_gouv" {
 
   events = ["Microsoft.Storage.BlobCreated"]
 
-  blob_path_begins_with = "data_gouv/"
+  scope = "/subscriptions/${var.subscription_id}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.Storage/storageAccounts/${azurerm_storage_account.datalake.name}/blobServices/default/containers/${azurerm_storage_container.raw.name}/blobs/data_gouv"
 
   pipeline {
-    name = azurerm_data_factory_pipeline.universal_parquet_pipeline.name
-
-    parameters = {
-      outputPath = "@{triggerBody().folderPath}"
-      outputName = "@{replace(triggerBody().fileName, '\\.[^.]+$', '.parquet')}"
-    }
+    name = azurerm_data_factory_pipeline.csv_to_parquet_pipeline.name
   }
-}
-
-# Attribution du rôle Storage Blob Data Contributor à la Data Factory
-resource "azurerm_role_assignment" "adf_storage_contributor" {
-  scope                = azurerm_storage_account.datalake.id
-  role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = azurerm_data_factory.adf.identity[0].principal_id
 }
 
