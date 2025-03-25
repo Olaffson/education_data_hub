@@ -207,8 +207,8 @@ resource "azurerm_data_factory_trigger_blob_event" "raw_trigger" {
 
   events = ["Microsoft.Storage.BlobCreated"]
 
-  blob_path_begins_with = "raw/"
-  blob_path_ends_with   = "cleaned/"
+  blob_path_begins_with = "/raw/"
+  blob_path_ends_with   = "/cleaned/"
 
   pipeline {
     name = azurerm_data_factory_pipeline.universal_parquet_pipeline.name
