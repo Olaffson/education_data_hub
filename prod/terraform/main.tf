@@ -200,15 +200,50 @@ resource "azurerm_data_factory_pipeline" "universal_parquet_pipeline" {
 # 4. EVENT TRIGGER AUTOMATIQUE
 # -----------------------------
 
-resource "azurerm_data_factory_trigger_blob_event" "raw_trigger" {
-  name               = "TriggerOnRawFiles"
+# data_gouv/
+resource "azurerm_data_factory_trigger_blob_event" "trigger_data_gouv" {
+  name               = "TriggerDataGouv"
   data_factory_id    = azurerm_data_factory.adf.id
   storage_account_id = azurerm_storage_account.datalake.id
 
   events = ["Microsoft.Storage.BlobCreated"]
+  blob_path_begins_with = "data_gouv/"
 
-  blob_path_begins_with = ""
-  blob_path_ends_with   = ""
+  pipeline {
+    name = azurerm_data_factory_pipeline.universal_parquet_pipeline.name
+    parameters = {
+      outputPath = "@{triggerBody().folderPath}"
+      outputName = "@{replace(triggerBody().fileName, '\\.[^.]+$', '.parquet')}"
+    }
+  }
+}
+
+# insee/
+resource "azurerm_data_factory_trigger_blob_event" "trigger_insee" {
+  name               = "TriggerInsee"
+  data_factory_id    = azurerm_data_factory.adf.id
+  storage_account_id = azurerm_storage_account.datalake.id
+
+  events = ["Microsoft.Storage.BlobCreated"]
+  blob_path_begins_with = "insee/"
+
+  pipeline {
+    name = azurerm_data_factory_pipeline.universal_parquet_pipeline.name
+    parameters = {
+      outputPath = "@{triggerBody().folderPath}"
+      outputName = "@{replace(triggerBody().fileName, '\\.[^.]+$', '.parquet')}"
+    }
+  }
+}
+
+# opendatasoft/
+resource "azurerm_data_factory_trigger_blob_event" "trigger_opendatasoft" {
+  name               = "TriggerOpendatasoft"
+  data_factory_id    = azurerm_data_factory.adf.id
+  storage_account_id = azurerm_storage_account.datalake.id
+
+  events = ["Microsoft.Storage.BlobCreated"]
+  blob_path_begins_with = "opendatasoft/"
 
   pipeline {
     name = azurerm_data_factory_pipeline.universal_parquet_pipeline.name
