@@ -98,10 +98,19 @@ resource "azurerm_data_factory_dataset_parquet" "parquet_output" {
   data_factory_id     = azurerm_data_factory.adf.id
   linked_service_name = azurerm_data_factory_linked_service_data_lake_storage_gen2.datalake.name
 
+  parameters = {
+    outputPath = {
+      type = "String"
+    }
+    outputName = {
+      type = "String"
+    }
+  }
+
   azure_blob_storage_location {
     container = azurerm_storage_container.cleaned.name
-    path      = "@{pipeline().parameters.outputPath}"
-    filename  = "@{pipeline().parameters.outputName}"
+    path      = "@dataset().outputPath"
+    filename  = "@dataset().outputName"
   }
 }
 
@@ -150,7 +159,6 @@ resource "azurerm_data_factory_trigger_blob_event" "trigger_data_gouv" {
 
   events = ["Microsoft.Storage.BlobCreated"]
 
-  # Ne surtout pas inclure 'raw/' ici
   blob_path_begins_with = "data_gouv/"
 
   pipeline {
