@@ -149,7 +149,6 @@ resource "azurerm_data_factory_trigger_blob_event" "trigger_data_gouv" {
 
   events = ["Microsoft.Storage.BlobCreated"]
 
-  # IMPORTANT : Ne pas mettre "raw/" ni "blobs/" ni "/" au début
   blob_path_begins_with = "data_gouv"
 
   pipeline {
