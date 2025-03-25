@@ -89,3 +89,4 @@ Pour mettre à jour l'infrastructure :
 2. Créer une Pull Request
 3. Vérifier le plan d'exécution dans les Actions GitHub
 4. Merger dans main pour appliquer les changements
+
