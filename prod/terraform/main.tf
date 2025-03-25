@@ -142,6 +142,7 @@ resource "azurerm_data_factory_pipeline" "universal_parquet_pipeline" {
 # 4. EVENT TRIGGER AUTOMATIQUE
 # -----------------------------
 
+# probleme sur la creation du trigger, blob_path_begins_with et scope sont inutilisables
 resource "azurerm_data_factory_trigger_blob_event" "trigger_data_gouv" {
   name               = "TriggerDataGouv"
   data_factory_id    = azurerm_data_factory.adf.id
@@ -149,10 +150,12 @@ resource "azurerm_data_factory_trigger_blob_event" "trigger_data_gouv" {
 
   events = ["Microsoft.Storage.BlobCreated"]
 
-  scope = "/subscriptions/${var.subscription_id}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.Storage/storageAccounts/${azurerm_storage_account.datalake.name}/blobServices/default/containers/${azurerm_storage_container.raw.name}/blobs/data_gouv"
+  # Ne surtout pas inclure 'raw/' ici
+  blob_path_begins_with = "data_gouv/"
 
   pipeline {
     name = azurerm_data_factory_pipeline.universal_parquet_pipeline.name
+
     parameters = {
       outputPath = "@{triggerBody().folderPath}"
       outputName = "@{replace(triggerBody().fileName, '\\.[^.]+$', '.parquet')}"
