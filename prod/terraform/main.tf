@@ -206,7 +206,7 @@ resource "azurerm_data_factory_trigger_blob_event" "trigger_data_gouv" {
   data_factory_id    = azurerm_data_factory.adf.id
   storage_account_id = azurerm_storage_account.datalake.id
 
-  events = ["Microsoft.Storage.BlobCreated"]
+  events                = ["Microsoft.Storage.BlobCreated"]
   blob_path_begins_with = "data_gouv/"
 
   pipeline {
@@ -224,7 +224,7 @@ resource "azurerm_data_factory_trigger_blob_event" "trigger_insee" {
   data_factory_id    = azurerm_data_factory.adf.id
   storage_account_id = azurerm_storage_account.datalake.id
 
-  events = ["Microsoft.Storage.BlobCreated"]
+  events                = ["Microsoft.Storage.BlobCreated"]
   blob_path_begins_with = "insee/"
 
   pipeline {
@@ -242,7 +242,7 @@ resource "azurerm_data_factory_trigger_blob_event" "trigger_opendatasoft" {
   data_factory_id    = azurerm_data_factory.adf.id
   storage_account_id = azurerm_storage_account.datalake.id
 
-  events = ["Microsoft.Storage.BlobCreated"]
+  events                = ["Microsoft.Storage.BlobCreated"]
   blob_path_begins_with = "opendatasoft/"
 
   pipeline {
