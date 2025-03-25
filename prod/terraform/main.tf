@@ -77,7 +77,7 @@ resource "azurerm_data_factory_dataset_delimited_text" "data_gouv_csv" {
   name                = "DataGouvCsvDataset"
   data_factory_id     = azurerm_data_factory.adf.id
   linked_service_name = azurerm_data_factory_linked_service_data_lake_storage_gen2.datalake.name
-  
+
   azure_blob_storage_location {
     container = azurerm_storage_container.raw.name
     path      = "data_gouv"
@@ -85,10 +85,10 @@ resource "azurerm_data_factory_dataset_delimited_text" "data_gouv_csv" {
   }
 
   column_delimiter    = ";"
-  row_delimiter      = "\n"
-  encoding           = "UTF-8"
-  quote_character    = "\""
-  escape_character   = "\\"
+  row_delimiter       = "\n"
+  encoding            = "UTF-8"
+  quote_character     = "\""
+  escape_character    = "\\"
   first_row_as_header = true
 }
 
@@ -117,18 +117,18 @@ resource "azurerm_data_factory_pipeline" "csv_to_parquet_pipeline" {
       type = "Copy",
       inputs = [{
         referenceName = azurerm_data_factory_dataset_delimited_text.data_gouv_csv.name,
-        type = "DatasetReference"
+        type          = "DatasetReference"
       }],
       outputs = [{
         referenceName = azurerm_data_factory_dataset_parquet.data_gouv_parquet.name,
-        type = "DatasetReference"
+        type          = "DatasetReference"
       }],
       typeProperties = {
         source = {
           type = "DelimitedTextSource",
           storeSettings = {
-            type = "AzureBlobFSReadSettings",
-            recursive = true,
+            type             = "AzureBlobFSReadSettings",
+            recursive        = true,
             wildcardFileName = "*.csv"
           }
         },
