@@ -42,18 +42,14 @@ jobs:
       - name: 🔎 Terraform Validate
         run: terraform validate
 
-      - name: 📖 Terraform Plan
-        id: plan
-        run: terraform plan -out=tfplan -detailed-exitcode || echo "::set-output name=has_changes::true"
-
-      # - name: ✅ Terraform Apply
-      #   if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev') && github.event_name == 'push' && steps.plan.outputs.has_changes == 'true'
-      #   run: terraform apply -auto-approve tfplan
-
       - name: Import existing trigger
         run: |
           terraform import azurerm_data_factory_trigger_blob_event.trigger_data_gouv "/subscriptions/${ARM_SUBSCRIPTION_ID}/resourceGroups/RG-OKOTWICA-Prod/providers/Microsoft.DataFactory/factories/adf-okotwica-prod/triggers/TriggerDataGouv"
         continue-on-error: true
+
+      - name: 📖 Terraform Plan
+        id: plan
+        run: terraform plan -out=tfplan -detailed-exitcode || echo "::set-output name=has_changes::true"
 
       - name: ✅ Terraform Apply
         run: terraform apply -auto-approve tfplan
