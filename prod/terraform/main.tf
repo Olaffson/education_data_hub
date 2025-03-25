@@ -149,9 +149,8 @@ resource "azurerm_data_factory_trigger_blob_event" "trigger_data_gouv" {
 
   events = ["Microsoft.Storage.BlobCreated"]
 
-  blob_path_begins_with = "raw/data_gouv/"
+  scope = "/subscriptions/${var.subscription_id}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.Storage/storageAccounts/${azurerm_storage_account.datalake.name}/blobServices/default/containers/${azurerm_storage_container.raw.name}/blobs/data_gouv"
 
-  # test
   pipeline {
     name = azurerm_data_factory_pipeline.universal_parquet_pipeline.name
     parameters = {
