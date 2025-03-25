@@ -89,32 +89,6 @@ resource "azurerm_data_factory_dataset_delimited_text" "csv_dataset" {
   first_row_as_header = true
 }
 
-# # Excel Dataset - raw/insee/*.xlsx
-# resource "azurerm_data_factory_dataset_binary" "excel_dataset" {
-#   name                = "ExcelDataset"
-#   data_factory_id     = azurerm_data_factory.adf.id
-#   linked_service_name = azurerm_data_factory_linked_service_data_lake_storage_gen2.datalake.name
-
-#   azure_blob_storage_location {
-#     container = azurerm_storage_container.raw.name
-#     path      = "insee"
-#     filename  = "*.xlsx"
-#   }
-# }
-
-# JSON Dataset - raw/opendatasoft/*.json
-resource "azurerm_data_factory_dataset_json" "json_dataset" {
-  name                = "JsonDataset"
-  data_factory_id     = azurerm_data_factory.adf.id
-  linked_service_name = azurerm_data_factory_linked_service_data_lake_storage_gen2.datalake.name
-
-  azure_blob_storage_location {
-    container = azurerm_storage_container.raw.name
-    path      = "opendatasoft"
-    filename  = "*.json"
-  }
-}
-
 # -----------------------------
 # 2. DATASET PARQUET DESTINATION
 # -----------------------------
@@ -160,22 +134,6 @@ resource "azurerm_data_factory_pipeline" "universal_parquet_pipeline" {
           storeSettings = { type = "AzureBlobFSWriteSettings" }
         }
       }
-    },
-    {
-      name    = "CopyJson",
-      type    = "Copy",
-      inputs  = [{ referenceName = azurerm_data_factory_dataset_json.json_dataset.name, type = "DatasetReference" }],
-      outputs = [{ referenceName = azurerm_data_factory_dataset_parquet.parquet_output.name, type = "DatasetReference" }],
-      typeProperties = {
-        source = {
-          type          = "JsonSource",
-          storeSettings = { type = "AzureBlobFSReadSettings", recursive = true }
-        },
-        sink = {
-          type          = "ParquetSink",
-          storeSettings = { type = "AzureBlobFSWriteSettings" }
-        }
-      }
     }
   ])
 }
@@ -184,32 +142,15 @@ resource "azurerm_data_factory_pipeline" "universal_parquet_pipeline" {
 # 4. EVENT TRIGGER AUTOMATIQUE
 # -----------------------------
 
-resource "azurerm_data_factory_trigger_blob_event" "raw_trigger" {
-  name               = "TriggerOnRawFiles"
+resource "azurerm_data_factory_trigger_blob_event" "trigger_data_gouv" {
+  name               = "TriggerDataGouv"
   data_factory_id    = azurerm_data_factory.adf.id
   storage_account_id = azurerm_storage_account.datalake.id
 
   events = ["Microsoft.Storage.BlobCreated"]
 
-  blob_path_begins_with = "raw/"
-
-  pipeline {
-    name = azurerm_data_factory_pipeline.universal_parquet_pipeline.name
-
-    parameters = {
-      outputPath = "@{triggerBody().folderPath}"
-      outputName = "@{replace(triggerBody().fileName, '\\.[^.]+$', '.parquet')}"
-    }
-  }
-}
-# opendatasoft/
-resource "azurerm_data_factory_trigger_blob_event" "trigger_opendatasoft" {
-  name               = "TriggerOpendatasoft"
-  data_factory_id    = azurerm_data_factory.adf.id
-  storage_account_id = azurerm_storage_account.datalake.id
-
-  events                = ["Microsoft.Storage.BlobCreated"]
-  blob_path_begins_with = "raw/"
+  # IMPORTANT : Ne pas mettre "raw/" ni "blobs/" ni "/" au début
+  blob_path_begins_with = "data_gouv"
 
   pipeline {
     name = azurerm_data_factory_pipeline.universal_parquet_pipeline.name
