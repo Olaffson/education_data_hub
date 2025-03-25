@@ -99,13 +99,10 @@ resource "azurerm_data_factory_dataset_parquet" "parquet_output" {
   linked_service_name = azurerm_data_factory_linked_service_data_lake_storage_gen2.datalake.name
 
   parameters = {
-    outputPath = {
-      type = "String"
-    }
-    outputName = {
-      type = "String"
-    }
+    outputPath = ""
+    outputName = ""
   }
+
 
   azure_blob_storage_location {
     container = azurerm_storage_container.cleaned.name
