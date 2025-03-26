@@ -3,6 +3,7 @@ help.txt
 dev/
 .cursor/
 *.ps1
+tmp_data/
 
 # Fichiers et dossiers Terraform
 dev/terraform/
