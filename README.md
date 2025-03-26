@@ -14,3 +14,4 @@ graph TD
     Raw -->|Lecture| raw_data[(raw/data_gouv/*.csv)]
     Cleaned -->|Écriture| cleaned_data[(cleaned/data_gouv/cleaned_<timestamp>.csv)]
 ```
+
