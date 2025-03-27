@@ -35,6 +35,10 @@ jobs:
         with:
           terraform_version: latest
 
+      - name: 🔓 Force Unlock Terraform State
+        run: terraform force-unlock -force 49d418af-f6c7-08bb-8ab4-ee6ac7551c4f
+        continue-on-error: true
+
       - name: 🔍 Terraform Format Check
         run: terraform fmt -check
 
@@ -62,3 +66,11 @@ jobs:
       - name: 📝 No Changes Required
         if: steps.plan.exit_code == 0
         run: echo "Aucun changement nécessaire - toutes les ressources sont déjà créées"
+
+      - name: 🧹 Cleanup
+        if: always()
+        run: |
+          rm -f tfplan
+          terraform workspace select default
+          terraform force-unlock -force 49d418af-f6c7-08bb-8ab4-ee6ac7551c4f
+        continue-on-error: true
