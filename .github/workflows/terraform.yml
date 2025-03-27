@@ -35,9 +35,17 @@ jobs:
         with:
           terraform_version: latest
 
-      - name: 🔓 Force Unlock Terraform State
-        run: terraform force-unlock -force 49d418af-f6c7-08bb-8ab4-ee6ac7551c4f
+      - name: 🔓 Force Unlock (if needed)
+        run: |
+          LOCK_ID=$(terraform force-unlock --dry-run 2>&1 | grep -oE '[a-f0-9-]{36}' || true)
+          if [ ! -z "$LOCK_ID" ]; then
+            echo "🔓 Lock detected. Forcing unlock with ID $LOCK_ID"
+            terraform force-unlock -force "$LOCK_ID"
+          else
+            echo "✅ No lock found"
+          fi
         continue-on-error: true
+        
 
       - name: 🔍 Terraform Format Check
         run: terraform fmt -check
