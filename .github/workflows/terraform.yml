@@ -68,11 +68,9 @@ jobs:
           echo "has_changes=$?" >> $GITHUB_OUTPUT
 
       - name: ✅ Terraform Apply
-        if: steps.plan.exit_code == 2
         run: terraform apply -lock=false -auto-approve tfplan
       
       - name: 📝 No Changes Required
-        if: steps.plan.exit_code == 0
         run: echo "Aucun changement nécessaire - toutes les ressources sont déjà créées"
 
       - name: 🧹 Cleanup
