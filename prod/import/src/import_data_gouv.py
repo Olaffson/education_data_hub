@@ -93,7 +93,7 @@ def main():
             
             # Upload du fichier converti
             with open(local_path, "rb") as f:
-                upload_json_to_azure(f.read(), DESTINATION_FOLDER, file_name)
+                upload_file_to_azure(f.read(), DESTINATION_FOLDER, file_name)
             
             success_count += 1
         except Exception as e:

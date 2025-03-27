@@ -31,6 +31,21 @@ except AzureError as error:
     raise
 
 
+def upload_file_to_azure(content_bytes, container_name, blob_name):
+    """
+    Upload binaire (ex: CSV) vers Azure Blob
+    """
+    try:
+        blob_service_client = get_blob_service_client()
+        blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
+
+        blob_client.upload_blob(content_bytes, overwrite=True)
+        logger.info(f"✅ Upload réussi vers {container_name}/{blob_name}")
+    except Exception as e:
+        logger.error(f"❌ Erreur lors de l'upload: {str(e)}")
+        raise
+
+
 def upload_json_to_azure(json_data, destination_folder, file_name):
     """
     Upload un JSON directement sur Azure Blob Storage depuis un objet Python.
