@@ -90,12 +90,12 @@ resource "azurerm_mssql_server" "sql_server" {
 
 # Base de données Azure SQL
 resource "azurerm_mssql_database" "education_db" {
-  name               = "EducationData"
-  server_id          = azurerm_mssql_server.sql_server.id
-  sku_name           = "Basic"
-  max_size_gb        = 2
-  zone_redundant     = false
-  collation          = "SQL_Latin1_General_CP1_CI_AS"
+  name                 = "EducationData"
+  server_id            = azurerm_mssql_server.sql_server.id
+  sku_name             = "Basic"
+  max_size_gb          = 2
+  zone_redundant       = false
+  collation            = "SQL_Latin1_General_CP1_CI_AS"
   storage_account_type = "Local"
 
   tags = {
