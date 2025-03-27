@@ -64,12 +64,12 @@ jobs:
       - name: 📖 Terraform Plan
         id: plan
         run: |
-          terraform plan -out=tfplan
+          terraform plan -lock=false -out=tfplan
           echo "has_changes=$?" >> $GITHUB_OUTPUT
 
       - name: ✅ Terraform Apply
         if: steps.plan.exit_code == 2
-        run: terraform apply -auto-approve tfplan
+        run: terraform apply -lock=false -auto-approve tfplan
       
       - name: 📝 No Changes Required
         if: steps.plan.exit_code == 0
