@@ -69,7 +69,8 @@ jobs:
 
       - name: ✅ Terraform Apply
         if: steps.plan.exit_code == 2
-        run: terraform apply -lock=false -auto-approve tfplan
+        run: terraform apply -auto-approve tfplan
+        # run: terraform apply -lock=false -auto-approve tfplan
       
       - name: 📝 No Changes Required
         if: steps.plan.exit_code == 0
