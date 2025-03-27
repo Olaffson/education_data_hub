@@ -51,11 +51,14 @@ jobs:
 
       - name: 📖 Terraform Plan
         id: plan
-        run: terraform plan -out=tfplan -detailed-exitcode || echo "::set-output name=has_changes::true"
+        run: |
+          terraform plan -out=tfplan
+          echo "has_changes=$?" >> $GITHUB_OUTPUT
 
       - name: ✅ Terraform Apply
+        if: steps.plan.exit_code == 2
         run: terraform apply -auto-approve tfplan
       
       - name: 📝 No Changes Required
-        if: steps.plan.outputs.has_changes != 'true'
+        if: steps.plan.exit_code == 0
         run: echo "Aucun changement nécessaire - toutes les ressources sont déjà créées"
