@@ -73,8 +73,8 @@ resource "azurerm_role_assignment" "adf_storage_contributor" {
 }
 
 # Serveur SQL Azure
-resource "azurerm_mssql_server_ok" "sql_server" {
-  name                         = "sqlserver-${var.environment}"
+resource "azurerm_mssql_server" "sql_server" {
+  name                         = "sqlserver-okotwica-${var.environment}"
   resource_group_name          = azurerm_resource_group.rg.name
   location                     = azurerm_resource_group.rg.location
   version                      = "12.0"
@@ -89,7 +89,7 @@ resource "azurerm_mssql_server_ok" "sql_server" {
 }
 
 # Base de données Azure SQL
-resource "azurerm_mssql_database_ok" "education_db" {
+resource "azurerm_mssql_database" "education_db" {
   name                 = "EducationData"
   server_id            = azurerm_mssql_server.sql_server.id
   sku_name             = "Basic"
