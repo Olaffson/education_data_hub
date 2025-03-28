@@ -1,16 +1,21 @@
 name: "Import Data to SQL"
 
 on:
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environnement de déploiement'
-        required: true
-        default: 'prod'
-        type: choice
-        options:
-          - prod
-          - dev
+    workflow_dispatch:  # Déclenchement manuel
+    schedule:
+      - cron: '0 0 1 * *'  # Le 1er de chaque mois à minuit (00:00)
+
+# on:
+#   workflow_dispatch:
+#     inputs:
+#       environment:
+#         description: 'Environnement de déploiement'
+#         required: true
+#         default: 'prod'
+#         type: choice
+#         options:
+#           - prod
+#           - dev
 
 jobs:
   import_to_sql:
