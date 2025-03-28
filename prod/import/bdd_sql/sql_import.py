@@ -2,7 +2,7 @@ import pandas as pd
 import logging
 from azure.storage.blob import BlobServiceClient
 from io import StringIO
-from .sql_connection import get_sql_connection, close_sql_connection
+from sql_connection import get_sql_connection, close_sql_connection
 
 # Configuration du logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

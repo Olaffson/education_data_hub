@@ -1,4 +1,4 @@
-from bdd_sql.sql_import import import_ips_lycee_to_sql
+from sql_import import import_ips_lycee_to_sql
 
 def main():
     import_ips_lycee_to_sql()
