@@ -5,23 +5,10 @@ on:
   schedule:
     - cron: '0 0 1 * *'  # Le 1er de chaque mois à minuit (00:00)
 
-# on:
-#   workflow_dispatch:
-#     inputs:
-#       environment:
-#         description: 'Environnement de déploiement'
-#         required: true
-#         default: 'prod'
-#         type: choice
-#         options:
-#           - prod
-#           - dev
-
 jobs:
   import_to_sql:
     name: "Import Data to SQL Database"
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}
 
     env:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
