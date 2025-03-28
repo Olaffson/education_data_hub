@@ -63,6 +63,19 @@ Pour appliquer les modifications locales :
 terraform apply
 ```
 
+## Diagramme du pipeline
+
+```mermaid
+graph TD
+  A[Déclencheur Blob Storage] --> B[Pipeline UniversalConvertToParquet]
+  B --> C[CopyCsv - raw/data_gouv/*.csv]
+  B --> D[CopyExcel - raw/insee/*.xlsx]
+  B --> E[CopyJson - raw/opendatasoft/*.json]
+  C --> F[Parquet - cleaned/data_gouv/*.parquet]
+  D --> G[Parquet - cleaned/insee/*.parquet]
+  E --> H[Parquet - cleaned/opendatasoft/*.parquet]
+```
+
 ## Sécurité
 
 - Tous les containers sont configurés en accès privé
@@ -76,3 +89,4 @@ Pour mettre à jour l'infrastructure :
 2. Créer une Pull Request
 3. Vérifier le plan d'exécution dans les Actions GitHub
 4. Merger dans main pour appliquer les changements
+

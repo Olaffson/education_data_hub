@@ -4,6 +4,7 @@ Module principal pour l'interaction avec Azure Blob Storage
 
 import json
 import logging
+import os
 
 import requests
 from azure.core.exceptions import AzureError
@@ -28,6 +29,21 @@ try:
 except AzureError as error:
     logger.error("Erreur d'initialisation Azure: %s", str(error))
     raise
+
+
+def upload_file_to_azure(content_bytes, container_name, blob_name):
+    """
+    Upload binaire (ex: CSV) vers Azure Blob
+    """
+    try:
+        blob_service_client = get_blob_service_client()
+        blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
+
+        blob_client.upload_blob(content_bytes, overwrite=True)
+        logger.info(f"✅ Upload réussi vers {container_name}/{blob_name}")
+    except Exception as e:
+        logger.error(f"❌ Erreur lors de l'upload: {str(e)}")
+        raise
 
 
 def upload_json_to_azure(json_data, destination_folder, file_name):
@@ -55,28 +71,39 @@ def upload_json_to_azure(json_data, destination_folder, file_name):
 
 def upload_from_url(file_url, destination_folder, file_name):
     """
-    Télécharge un fichier depuis une URL et l'upload directement vers Azure Blob Storage.
+    Télécharge un fichier depuis une URL, le convertit en UTF-8 si CSV, puis l'upload dans Azure Blob Storage.
     """
     try:
-        logger.info(f"Téléchargement depuis {file_url}")
-        response = requests.get(file_url, stream=True)
+        logger.info(f"📥 Téléchargement depuis {file_url}")
+        response = requests.get(file_url)
         response.raise_for_status()
 
-        blob_name = f"{destination_folder}/{file_name}"
-        blob_client = container_client.get_blob_client(blob_name)
+        # Chemin complet du blob
+        blob_path = f"{destination_folder}/{file_name}"
+        tmp_path = os.path.join("tmp_data", file_name)
 
-        logger.info(f"Upload vers {blob_name}")
-        blob_client.upload_blob(response.raw, overwrite=True)
-        logger.info(f"✅ Fichier uploadé avec succès: {blob_name}")
+        # Création du dossier temporaire si nécessaire
+        os.makedirs(os.path.dirname(tmp_path), exist_ok=True)
 
-    except requests.exceptions.RequestException as e:
-        logger.error(f"❌ Erreur lors du téléchargement: {str(e)}")
-        raise
-    except AzureError as e:
-        logger.error(f"❌ Erreur Azure: {str(e)}")
-        raise
+        # Traitement des fichiers CSV : conversion en UTF-8
+        if file_name.lower().endswith(".csv"):
+            with open(tmp_path, "w", encoding="utf-8", newline="") as f_out:
+                text = response.content.decode("utf-8-sig")
+                f_out.write(text)
+            logger.info(f"✅ Conversion en UTF-8 standard effectuée pour {tmp_path}")
+        else:
+            with open(tmp_path, "wb") as f_out:
+                f_out.write(response.content)
+
+        # Upload vers Azure
+        blob_client = container_client.get_blob_client(blob_path)
+        with open(tmp_path, "rb") as data:
+            blob_client.upload_blob(data, overwrite=True)
+
+        logger.info(f"✅ Fichier uploadé avec succès: {blob_path}")
+
     except Exception as e:
-        logger.error(f"❌ Erreur inattendue: {str(e)}")
+        logger.error(f"❌ Erreur sur {file_name}: {str(e)}")
         raise
 
 
