@@ -47,7 +47,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: 🚀 Run SQL Import
-        run: python bdd_sql.import_to_sql
+        run: python -m bdd_sql.import_to_sql
         env:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
