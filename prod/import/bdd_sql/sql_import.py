@@ -226,11 +226,11 @@ def import_ips_lycee_to_sql():
                 row.get("commune"),
                 row.get("secteur"),
                 row.get("type_lycee"),
-                row.get("ips_voie_gt"),
-                row.get("ips_voie_pro"),
-                row.get("ips_ensemble_gt_pro"),
-                row.get("ecart_type_ips_voie_gt"),
-                row.get("ecart_type_ips_voie_pro"),
+                float(row["ips_voie_gt"]) if pd.notnull(row["ips_voie_gt"]) else None,
+                float(row["ips_voie_pro"]) if pd.notnull(row["ips_voie_pro"]) else None,
+                float(row["ips_ensemble_gt_pro"]) if pd.notnull(row["ips_ensemble_gt_pro"]) else None,
+                float(row["ecart_type_ips_voie_gt"]) if pd.notnull(row["ecart_type_ips_voie_gt"]) else None,
+                float(row["ecart_type_ips_voie_pro"]) if pd.notnull(row["ecart_type_ips_voie_pro"]) else None
             ))
         conn.commit()
 
