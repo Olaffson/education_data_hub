@@ -120,6 +120,7 @@
 
 import os
 import io
+import unidecode
 import logging
 import pandas as pd
 from azure.identity import DefaultAzureCredential
@@ -151,6 +152,23 @@ def import_ips_lycee_to_sql():
         # Lecture du CSV en DataFrame
         csv_string = blob_data.readall().decode("utf-8-sig")
         df = pd.read_csv(io.StringIO(csv_string), sep=";")
+
+        
+        # Nettoyage des noms de colonnes
+        df.columns = [
+        unidecode.unidecode(col).strip().lower().replace(" ", "_").replace("'", "").replace("-", "_")
+        for col in df.columns
+        ]
+
+        logger.info(f"🧾 Colonnes après nettoyage : {df.columns.tolist()}")
+
+        # Renommage pour correspondre au mapping attendu dans la BDD
+        df.rename(columns={
+        "uai": "code_etablissement",
+        "nom_de_letablissment": "nom_etablissement",
+        "nom_de_la_commune": "commune"
+        }, inplace=True)
+
         logger.info(f"🧾 Colonnes disponibles : {list(df.columns)}")
         logger.info(f"✅ {len(df)} lignes chargées depuis le CSV")
 
