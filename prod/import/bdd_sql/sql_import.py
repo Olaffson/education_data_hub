@@ -140,82 +140,97 @@ def import_ips_lycee_to_sql():
     logger.info("📥 Début import des données IPS lycée")
 
     try:
-        # Authentification via DefaultAzureCredential
+        # Authentification
         credential = DefaultAzureCredential()
         blob_service_client = BlobServiceClient(account_url=BLOB_ACCOUNT_URL, credential=credential)
-
-        # Accès au blob
         blob_client = blob_service_client.get_blob_client(container=CONTAINER_NAME, blob=BLOB_NAME)
         blob_data = blob_client.download_blob()
         logger.info("✅ Blob téléchargé avec succès depuis Azure Storage")
 
-        # Lecture du CSV en DataFrame
+        # Lecture du contenu
         csv_string = blob_data.readall().decode("utf-8-sig")
         df = pd.read_csv(io.StringIO(csv_string), sep=";")
 
-        
         # Nettoyage des noms de colonnes
         df.columns = [
-        unidecode.unidecode(col).strip().lower().replace(" ", "_").replace("'", "").replace("-", "_").replace("é", "e")
-        for col in df.columns
+            unidecode.unidecode(col).strip().lower().replace(" ", "_").replace("'", "").replace("-", "_").replace("é", "e")
+            for col in df.columns
         ]
 
-        logger.info(f"🧾 Colonnes après nettoyage : {df.columns.tolist()}")
-
-        # Renommage pour correspondre au mapping attendu dans la BDD
+        # Renommage des colonnes pour correspondre à la table
         df.rename(columns={
-        "uai": "code_etablissement",
-        "nom_de_letablissment": "nom_etablissement",
-        "nom_de_la_commune": "commune",
-        "code_du_departement": "code_departement",
-        "code_insee_de_la_commune": "code_insee_commune",
-        "type_de_lycee": "type_lycee",
-        "ecart_type_de_lips_voie_gt": "ecart_type_ips_voie_gt",
-        "ecart_type_de_lips_voie_pro": "ecart_type_ips_voie_pro"
+            "uai": "code_etablissement",
+            "nom_de_letablissment": "nom_etablissement",
+            "nom_de_la_commune": "commune",
+            "code_du_departement": "code_departement",
+            "code_insee_de_la_commune": "code_insee_commune",
+            "type_de_lycee": "type_lycee",
+            "ecart_type_de_lips_voie_gt": "ecart_type_ips_voie_gt",
+            "ecart_type_de_lips_voie_pro": "ecart_type_ips_voie_pro"
         }, inplace=True)
 
         logger.info(f"🧾 Colonnes disponibles : {list(df.columns)}")
         logger.info(f"✅ {len(df)} lignes chargées depuis le CSV")
 
+        # Conversion des colonnes numériques
+        for col in [
+            "ips_voie_gt", "ips_voie_pro", "ips_ensemble_gt_pro",
+            "ecart_type_ips_voie_gt", "ecart_type_ips_voie_pro"
+        ]:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+
         # Connexion SQL
         conn = get_sql_connection()
         cursor = conn.cursor()
 
-        # Création de la table si nécessaire
+        # Création de la table
         cursor.execute("""
             IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='ips_lycee' AND xtype='U')
             CREATE TABLE ips_lycee (
-            rentree_scolaire NVARCHAR(20),
-            academie NVARCHAR(100),
-            code_departement NVARCHAR(10),
-            departement NVARCHAR(100),
-            code_etablissement VARCHAR(20),
-            nom_etablissement NVARCHAR(255),
-            code_insee_commune NVARCHAR(10),
-            commune NVARCHAR(100),
-            secteur NVARCHAR(50),
-            type_lycee NVARCHAR(50),
-            ips_voie_gt FLOAT,
-            ips_voie_pro FLOAT,
-            ips_ensemble_gt_pro FLOAT,
-            ecart_type_ips_voie_gt FLOAT,
-            ecart_type_ips_voie_pro FLOAT
+                rentree_scolaire NVARCHAR(20),
+                academie NVARCHAR(100),
+                code_departement NVARCHAR(10),
+                departement NVARCHAR(100),
+                code_etablissement VARCHAR(20),
+                nom_etablissement NVARCHAR(255),
+                code_insee_commune NVARCHAR(10),
+                commune NVARCHAR(100),
+                secteur NVARCHAR(50),
+                type_lycee NVARCHAR(50),
+                ips_voie_gt FLOAT,
+                ips_voie_pro FLOAT,
+                ips_ensemble_gt_pro FLOAT,
+                ecart_type_ips_voie_gt FLOAT,
+                ecart_type_ips_voie_pro FLOAT
             )
         """)
         conn.commit()
 
-        # Insertion des données
+        # Insertion des lignes
         for _, row in df.iterrows():
             cursor.execute("""
-                INSERT INTO ips_lycee (rentree_scolaire, academie, code_departement, departement,
+                INSERT INTO ips_lycee (
+                    rentree_scolaire, academie, code_departement, departement,
                     code_etablissement, nom_etablissement, code_insee_commune, commune,
                     secteur, type_lycee, ips_voie_gt, ips_voie_pro,
                     ips_ensemble_gt_pro, ecart_type_ips_voie_gt, ecart_type_ips_voie_pro
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (row["rentree_scolaire"], row["academie"], row["code_departement"], row["departement"],
-                row["code_etablissement"], row["nom_etablissement"], row["code_insee_commune"], row["commune"],
-                row["secteur"], row["type_lycee"], row["ips_voie_gt"], row["ips_voie_pro"],
-                row["ips_ensemble_gt_pro"], row["ecart_type_ips_voie_gt"], row["ecart_type_ips_voie_pro"]
+            """, (
+                row.get("rentree_scolaire"),
+                row.get("academie"),
+                row.get("code_departement"),
+                row.get("departement"),
+                row.get("code_etablissement"),
+                row.get("nom_etablissement"),
+                row.get("code_insee_commune"),
+                row.get("commune"),
+                row.get("secteur"),
+                row.get("type_lycee"),
+                row.get("ips_voie_gt"),
+                row.get("ips_voie_pro"),
+                row.get("ips_ensemble_gt_pro"),
+                row.get("ecart_type_ips_voie_gt"),
+                row.get("ecart_type_ips_voie_pro"),
             ))
         conn.commit()
 
