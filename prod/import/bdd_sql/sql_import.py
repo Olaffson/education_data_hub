@@ -167,7 +167,8 @@ def import_ips_lycee_to_sql():
         "uai": "code_etablissement",
         "nom_de_letablissment": "nom_etablissement",
         "nom_de_la_commune": "commune",
-        "code_du_departement": "code_departement"
+        "code_du_departement": "code_departement",
+        "code_insee_de_la_commune": "code_insee_commune"
         }, inplace=True)
 
         logger.info(f"🧾 Colonnes disponibles : {list(df.columns)}")
