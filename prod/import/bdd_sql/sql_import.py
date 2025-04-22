@@ -151,6 +151,7 @@ def import_ips_lycee_to_sql():
         # Lecture du CSV en DataFrame
         csv_string = blob_data.readall().decode("utf-8-sig")
         df = pd.read_csv(io.StringIO(csv_string), sep=";")
+        logger.info(f"🧾 Colonnes disponibles : {list(df.columns)}")
         logger.info(f"✅ {len(df)} lignes chargées depuis le CSV")
 
         # Connexion SQL
