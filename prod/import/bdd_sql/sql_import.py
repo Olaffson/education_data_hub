@@ -156,7 +156,7 @@ def import_ips_lycee_to_sql():
         
         # Nettoyage des noms de colonnes
         df.columns = [
-        unidecode.unidecode(col).strip().lower().replace(" ", "_").replace("'", "").replace("-", "_")
+        unidecode.unidecode(col).strip().lower().replace(" ", "_").replace("'", "").replace("-", "_").replace("é", "e")
         for col in df.columns
         ]
 
@@ -180,12 +180,21 @@ def import_ips_lycee_to_sql():
         cursor.execute("""
             IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='ips_lycee' AND xtype='U')
             CREATE TABLE ips_lycee (
-                code_etablissement VARCHAR(50),
-                nom_etablissement NVARCHAR(255),
-                commune NVARCHAR(255),
-                academie NVARCHAR(255),
-                code_academie VARCHAR(50),
-                ips FLOAT
+            rentree_scolaire NVARCHAR(20),
+            academie NVARCHAR(100),
+            code_departement NVARCHAR(10),
+            departement NVARCHAR(100),
+            code_etablissement VARCHAR(20),
+            nom_etablissement NVARCHAR(255),
+            code_insee_commune NVARCHAR(10),
+            commune NVARCHAR(100),
+            secteur NVARCHAR(50),
+            type_lycee NVARCHAR(50),
+            ips_voie_gt FLOAT,
+            ips_voie_pro FLOAT,
+            ips_ensemble_gt_pro FLOAT,
+            ecart_type_ips_voie_gt FLOAT,
+            ecart_type_ips_voie_pro FLOAT
             )
         """)
         conn.commit()
@@ -193,10 +202,16 @@ def import_ips_lycee_to_sql():
         # Insertion des données
         for _, row in df.iterrows():
             cursor.execute("""
-                INSERT INTO ips_lycee (code_etablissement, nom_etablissement, commune, academie, code_academie, ips)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, row['code_etablissement'], row['nom_etablissement'], row['commune'],
-                 row['academie'], row['code_academie'], row['ips'])
+                INSERT INTO ips_lycee (rentree_scolaire, academie, code_departement, departement,
+                    code_etablissement, nom_etablissement, code_insee_commune, commune,
+                    secteur, type_lycee, ips_voie_gt, ips_voie_pro,
+                    ips_ensemble_gt_pro, ecart_type_ips_voie_gt, ecart_type_ips_voie_pro
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (row["rentree_scolaire"], row["academie"], row["code_departement"], row["departement"],
+                row["code_etablissement"], row["nom_etablissement"], row["code_insee_commune"], row["commune"],
+                row["secteur"], row["type_lycee"], row["ips_voie_gt"], row["ips_voie_pro"],
+                row["ips_ensemble_gt_pro"], row["ecart_type_ips_voie_gt"], row["ecart_type_ips_voie_pro"]
+            ))
         conn.commit()
 
         logger.info("✅ Données insérées dans la base SQL avec succès")
