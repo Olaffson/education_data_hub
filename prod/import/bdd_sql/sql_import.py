@@ -170,8 +170,8 @@ def import_ips_lycee_to_sql():
         "code_du_departement": "code_departement",
         "code_insee_de_la_commune": "code_insee_commune",
         "type_de_lycee": "type_lycee",
-        "ecart_type_de_l_ips_voie_gt": "ecart_type_ips_voie_gt",
-        "ecart_type_de_l_ips_voie_pro": "ecart_type_ips_voie_pro"
+        "ecart_type_de_lips_voie_gt": "ecart_type_ips_voie_gt",
+        "ecart_type_de_lips_voie_pro": "ecart_type_ips_voie_pro"
         }, inplace=True)
 
         logger.info(f"🧾 Colonnes disponibles : {list(df.columns)}")
