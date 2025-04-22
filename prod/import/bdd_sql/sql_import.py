@@ -166,7 +166,8 @@ def import_ips_lycee_to_sql():
         df.rename(columns={
         "uai": "code_etablissement",
         "nom_de_letablissment": "nom_etablissement",
-        "nom_de_la_commune": "commune"
+        "nom_de_la_commune": "commune",
+        "code_du_departement": "code_departement"
         }, inplace=True)
 
         logger.info(f"🧾 Colonnes disponibles : {list(df.columns)}")
