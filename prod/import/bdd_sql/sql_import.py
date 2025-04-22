@@ -119,6 +119,7 @@
 
 
 import os
+import io
 import logging
 import pandas as pd
 from azure.identity import DefaultAzureCredential
@@ -148,7 +149,8 @@ def import_ips_lycee_to_sql():
         logger.info("✅ Blob téléchargé avec succès depuis Azure Storage")
 
         # Lecture du CSV en DataFrame
-        df = pd.read_csv(blob_data.readall().decode("utf-8-sig"))
+        csv_string = blob_data.readall().decode("utf-8-sig")
+        df = pd.read_csv(io.StringIO(csv_string), sep=";")
         logger.info(f"✅ {len(df)} lignes chargées depuis le CSV")
 
         # Connexion SQL
