@@ -74,7 +74,7 @@ resource "azurerm_role_assignment" "adf_storage_contributor" {
 
 # Serveur SQL Azure
 resource "azurerm_mssql_server" "sql_server" {
-  name                         = "sqlserver-okotwica-${var.environment}"
+  name                         = "sqlserver-okotwica-prod"
   resource_group_name          = azurerm_resource_group.rg.name
   location                     = azurerm_resource_group.rg.location
   version                      = "12.0"

@@ -1,0 +1,43 @@
+FROM python:3.11-slim
+
+
+WORKDIR /app
+
+
+# Installation des dépendances ODBC
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    gnupg \
+    curl \
+    apt-transport-https \
+    build-essential \
+    unixodbc \
+    unixodbc-dev \
+    odbcinst \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+
+# Configuration du dépôt Microsoft et installation du pilote
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+    curl https://packages.microsoft.com/config/debian/11/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
+    apt-get update && \
+    ACCEPT_EULA=Y apt-get install -y msodbcsql18 && \
+    rm -rf /var/lib/apt/lists/*
+
+
+# Copier et installer les dépendances Python
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+
+# Copier le code de l'application (sans les fichiers sensibles grâce à .dockerignore)
+COPY . .
+
+
+# Exposer le port
+EXPOSE 8000
+
+
+# Commande par défaut, peut être remplacée lors du déploiement
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

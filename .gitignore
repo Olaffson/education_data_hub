@@ -1,9 +1,11 @@
 # help
 help.txt
 dev/
+certification/
 .cursor/
 *.ps1
 tmp_data/
+archi_general.md
 
 # Fichiers et dossiers Terraform
 dev/terraform/
