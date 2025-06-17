@@ -1,0 +1,12 @@
+fastapi==0.115.12
+pyodbc
+python-dotenv
+python-jose[cryptography]==3.4.0
+uvicorn[standard]==0.34.2
+pyjwt
+pydantic==2.11.3
+python-multipart==0.0.20
+passlib[bcrypt]==1.7.4
+pandas
+sqlalchemy==2.0.40
+bcrypt
