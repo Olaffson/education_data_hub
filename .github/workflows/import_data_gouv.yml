@@ -4,10 +4,6 @@ on:
   workflow_dispatch:  # Déclenchement manuel
   schedule:
     - cron: '0 0 1 * *'  # Le 1er de chaque mois à minuit (00:00)
-    # OU
-    # - cron: '0 8 1 * *'  # Le 1er de chaque mois à 8h00
-    # OU
-    # - cron: '0 0 15 * *'  # Le 15 de chaque mois à minuit
 
 jobs:
   check-and-import:

@@ -6,7 +6,7 @@ import logging
 import os
 import requests
 
-from azure_upload import upload_json_to_azure, upload_from_url, check_blob_exists, get_blob_list
+from azure_upload import upload_json_to_azure, upload_from_url, check_blob_exists, get_blob_list, upload_file_to_azure
 
 # Configuration du logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

@@ -140,50 +140,25 @@ def import_ips_lycee_to_sql():
     logger.info("📥 Début import des données IPS lycée")
 
     try:
-        # Authentification
+        # Authentification Azure
         credential = DefaultAzureCredential()
         blob_service_client = BlobServiceClient(account_url=BLOB_ACCOUNT_URL, credential=credential)
         blob_client = blob_service_client.get_blob_client(container=CONTAINER_NAME, blob=BLOB_NAME)
         blob_data = blob_client.download_blob()
         logger.info("✅ Blob téléchargé avec succès depuis Azure Storage")
 
-        # Lecture du contenu
+        # Lecture du CSV
         csv_string = blob_data.readall().decode("utf-8-sig")
         df = pd.read_csv(io.StringIO(csv_string), sep=";")
 
-        # Nettoyage des noms de colonnes
-        df.columns = [
-            unidecode.unidecode(col).strip().lower().replace(" ", "_").replace("'", "").replace("-", "_").replace("é", "e")
-            for col in df.columns
-        ]
-
-        # Renommage des colonnes pour correspondre à la table
-        df.rename(columns={
-            "uai": "code_etablissement",
-            "nom_de_letablissment": "nom_etablissement",
-            "nom_de_la_commune": "commune",
-            "code_du_departement": "code_departement",
-            "code_insee_de_la_commune": "code_insee_commune",
-            "type_de_lycee": "type_lycee",
-            "ecart_type_de_lips_voie_gt": "ecart_type_ips_voie_gt",
-            "ecart_type_de_lips_voie_pro": "ecart_type_ips_voie_pro"
-        }, inplace=True)
-
-        logger.info(f"🧾 Colonnes disponibles : {list(df.columns)}")
-        logger.info(f"✅ {len(df)} lignes chargées depuis le CSV")
-
-        # Conversion des colonnes numériques
-        for col in [
-            "ips_voie_gt", "ips_voie_pro", "ips_ensemble_gt_pro",
-            "ecart_type_ips_voie_gt", "ecart_type_ips_voie_pro"
-        ]:
-            df[col] = pd.to_numeric(df[col], errors="coerce")
+        logger.info(f"🧾 Colonnes détectées : {list(df.columns)}")
+        logger.info(f"✅ {len(df)} lignes chargées depuis le fichier CSV")
 
         # Connexion SQL
         conn = get_sql_connection()
         cursor = conn.cursor()
 
-        # Création de la table
+        # Création de la table si elle n'existe pas
         cursor.execute("""
             IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='ips_lycee' AND xtype='U')
             CREATE TABLE ips_lycee (
@@ -206,7 +181,7 @@ def import_ips_lycee_to_sql():
         """)
         conn.commit()
 
-        # Insertion des lignes
+        # Insertion
         for _, row in df.iterrows():
             cursor.execute("""
                 INSERT INTO ips_lycee (
@@ -215,25 +190,9 @@ def import_ips_lycee_to_sql():
                     secteur, type_lycee, ips_voie_gt, ips_voie_pro,
                     ips_ensemble_gt_pro, ecart_type_ips_voie_gt, ecart_type_ips_voie_pro
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                row.get("rentree_scolaire"),
-                row.get("academie"),
-                row.get("code_departement"),
-                row.get("departement"),
-                row.get("code_etablissement"),
-                row.get("nom_etablissement"),
-                row.get("code_insee_commune"),
-                row.get("commune"),
-                row.get("secteur"),
-                row.get("type_lycee"),
-                float(row["ips_voie_gt"]) if pd.notnull(row["ips_voie_gt"]) else None,
-                float(row["ips_voie_pro"]) if pd.notnull(row["ips_voie_pro"]) else None,
-                float(row["ips_ensemble_gt_pro"]) if pd.notnull(row["ips_ensemble_gt_pro"]) else None,
-                float(row["ecart_type_ips_voie_gt"]) if pd.notnull(row["ecart_type_ips_voie_gt"]) else None,
-                float(row["ecart_type_ips_voie_pro"]) if pd.notnull(row["ecart_type_ips_voie_pro"]) else None
-            ))
-        conn.commit()
+            """, tuple(row[col] if pd.notnull(row[col]) else None for col in df.columns))
 
+        conn.commit()
         logger.info("✅ Données insérées dans la base SQL avec succès")
 
     except Exception as e:
