@@ -11,7 +11,8 @@ AZURE_TENANT_ID = os.getenv("AZURE_TENANT_ID")
 AZURE_STORAGE_ACCOUNT = os.getenv("AZURE_STORAGE_ACCOUNT")
 
 # Authentification
-credential = DefaultAzureCredential()
+credential = DefaultAzureCredential(additionally_allowed_tenants=["*"])
+
 
 # Clients Azure Storage
 blob_service_client = BlobServiceClient(
