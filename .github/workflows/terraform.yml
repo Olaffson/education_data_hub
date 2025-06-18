@@ -1,13 +1,14 @@
 name: "Terraform Deploy to Azure"
 
 on:
-  push:
-    branches:
-      - main
-      - dev
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:  # Déclenchement manuel
+  # push:
+  #   branches:
+  #     - main
+  #     - dev
+  # pull_request:
+  #   branches:
+  #     - main
 
 jobs:
   terraform:

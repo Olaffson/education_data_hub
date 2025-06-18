@@ -134,7 +134,7 @@ logger = logging.getLogger(__name__)
 # Informations sur le blob
 BLOB_ACCOUNT_URL = "https://sadatalakeokotwicaprod.blob.core.windows.net"
 CONTAINER_NAME = "cleaned"
-BLOB_NAME = "ips_lycee_new.csv"
+BLOB_NAME = "ips_lycee.csv"
 
 def import_ips_lycee_to_sql():
     logger.info("📥 Début import des données IPS lycée")
