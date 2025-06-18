@@ -158,25 +158,28 @@ def import_ips_lycee_to_sql():
         conn = get_sql_connection()
         cursor = conn.cursor()
 
-        # Création de la table si elle n'existe pas
+        # Création de la table avec les 18 colonnes actuelles
         cursor.execute("""
-            IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='ips_lycee' AND xtype='U')
+            IF OBJECT_ID('ips_lycee', 'U') IS NULL
             CREATE TABLE ips_lycee (
                 rentree_scolaire NVARCHAR(20),
                 academie NVARCHAR(100),
-                code_departement NVARCHAR(10),
+                code_du_departement NVARCHAR(10),
                 departement NVARCHAR(100),
-                code_etablissement VARCHAR(20),
-                nom_etablissement NVARCHAR(255),
-                code_insee_commune NVARCHAR(10),
-                commune NVARCHAR(100),
+                uai VARCHAR(20),
+                nom_de_l_etablissment NVARCHAR(255),
+                code_insee_de_la_commune NVARCHAR(10),
+                nom_de_la_commune NVARCHAR(100),
                 secteur NVARCHAR(50),
-                type_lycee NVARCHAR(50),
+                type_de_lycee NVARCHAR(50),
                 ips_voie_gt FLOAT,
                 ips_voie_pro FLOAT,
                 ips_ensemble_gt_pro FLOAT,
-                ecart_type_ips_voie_gt FLOAT,
-                ecart_type_ips_voie_pro FLOAT
+                ecart_type_de_l_ips_voie_gt FLOAT,
+                ecart_type_de_l_ips_voie_pro FLOAT,
+                effectifs_voie_gt INT,
+                effectifs_voie_pro INT,
+                effectifs_ensemble_gt_pro INT
             )
         """)
         conn.commit()
@@ -185,11 +188,12 @@ def import_ips_lycee_to_sql():
         for _, row in df.iterrows():
             cursor.execute("""
                 INSERT INTO ips_lycee (
-                    rentree_scolaire, academie, code_departement, departement,
-                    code_etablissement, nom_etablissement, code_insee_commune, commune,
-                    secteur, type_lycee, ips_voie_gt, ips_voie_pro,
-                    ips_ensemble_gt_pro, ecart_type_ips_voie_gt, ecart_type_ips_voie_pro
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    rentree_scolaire, academie, code_du_departement, departement,
+                    uai, nom_de_l_etablissment, code_insee_de_la_commune, nom_de_la_commune,
+                    secteur, type_de_lycee, ips_voie_gt, ips_voie_pro,
+                    ips_ensemble_gt_pro, ecart_type_de_l_ips_voie_gt, ecart_type_de_l_ips_voie_pro,
+                    effectifs_voie_gt, effectifs_voie_pro, effectifs_ensemble_gt_pro
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, tuple(row[col] if pd.notnull(row[col]) else None for col in df.columns))
 
         conn.commit()
