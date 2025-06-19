@@ -2,14 +2,18 @@ name: "Import Data to SQL"
 
 on:
   workflow_dispatch:
+  # schedule:
+  #   - cron: '0 0 1 * *'
 
 jobs:
-  setup:
-    name: "🛠️ Setup Environment"
+  import-ips-lycee:
+    name: "📄 Import ips_lycee.csv"
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./prod/import
     steps:
-      - name: 🛎 Checkout Repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: 🐍 Set up Python
         uses: actions/setup-python@v4
@@ -26,25 +30,13 @@ jobs:
           source ~/.bashrc
 
       - name: 📥 Install Python Dependencies
-        working-directory: ./prod/import
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: 🔍 Vérification unidecode
-        run: python -c "import unidecode; print('✅ unidecode est installé')"
-
-  import-ips-lycee:
-    name: "📄 Import ips_lycee.csv"
-    needs: setup
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./prod/import
-    steps:
-      - uses: actions/checkout@v3
-      - run: python -m bdd_sql.import_ips_lycee_to_sql
-        env: &secrets
+      - name: 🚀 Import ips_lycee
+        run: python -m bdd_sql.import_ips_lycee_to_sql
+        env:
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
@@ -53,45 +45,119 @@ jobs:
 
   import-effectifs-tg:
     name: "📄 Import effectifs_tg.csv"
-    needs: setup
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./prod/import
     steps:
       - uses: actions/checkout@v3
-      - run: python -m bdd_sql.import_effectifs_tg_to_sql
-        env: *secrets
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: 📦 Install ODBC Driver
+        run: |
+          sudo curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+          curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
+          sudo apt-get update
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18 mssql-tools18
+          echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc
+          source ~/.bashrc
+
+      - name: 📥 Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 🚀 Import effectifs_tg
+        run: python -m bdd_sql.import_effectifs_tg_to_sql
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          SQL_ADMIN_USERNAME: ${{ secrets.SQL_ADMIN_USERNAME }}
+          SQL_ADMIN_PASSWORD: ${{ secrets.SQL_ADMIN_PASSWORD }}
 
   import-ecoles-effectifs:
     name: "📄 Import ecoles_effectifs.csv"
-    needs: setup
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./prod/import
     steps:
       - uses: actions/checkout@v3
-      - run: python -m bdd_sql.import_ecoles_effectifs_to_sql
-        env: *secrets
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: 📦 Install ODBC Driver
+        run: |
+          sudo curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+          curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
+          sudo apt-get update
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18 mssql-tools18
+          echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc
+          source ~/.bashrc
+
+      - name: 📥 Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 🚀 Import ecoles_effectifs
+        run: python -m bdd_sql.import_ecoles_effectifs_to_sql
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          SQL_ADMIN_USERNAME: ${{ secrets.SQL_ADMIN_USERNAME }}
+          SQL_ADMIN_PASSWORD: ${{ secrets.SQL_ADMIN_PASSWORD }}
 
   import-bac-par-academie:
     name: "📄 Import bac_par_academie.csv"
-    needs: setup
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./prod/import
     steps:
       - uses: actions/checkout@v3
-      - run: python -m bdd_sql.import_bac_par_academie_to_sql
-        env: *secrets
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: 📦 Install ODBC Driver
+        run: |
+          sudo curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+          curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
+          sudo apt-get update
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18 mssql-tools18
+          echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc
+          source ~/.bashrc
+
+      - name: 📥 Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 🚀 Import bac_par_academie
+        run: python -m bdd_sql.import_bac_par_academie_to_sql
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          SQL_ADMIN_USERNAME: ${{ secrets.SQL_ADMIN_USERNAME }}
+          SQL_ADMIN_PASSWORD: ${{ secrets.SQL_ADMIN_PASSWORD }}
 
   upload-logs:
     name: 📝 Upload Logs
     needs: [import-ips-lycee, import-effectifs-tg, import-ecoles-effectifs, import-bac-par-academie]
     runs-on: ubuntu-latest
-    if: always()
     steps:
       - uses: actions/checkout@v3
       - name: Upload logs
@@ -104,6 +170,7 @@ jobs:
           retention-days: 7
 
 
+          
 # name: "Import Data to SQL"
 
 # on:
