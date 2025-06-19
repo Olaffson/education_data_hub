@@ -26,12 +26,48 @@ jobs:
       - name: 🐳 Push to Docker Hub
         run: docker push olaffsen/education-api:latest
 
-      - name: 🔐 Login to Azure Container Registry (ACR)
-        run: echo "${{ secrets.ACR_PASSWORD }}" | docker login acrokotwicaprod.azurecr.io -u ${{ secrets.ACR_USERNAME }} --password-stdin
-      
-      - name: 🚀 Push to ACR
+      - name: 🚀 Deploy DockerHub image to Azure Container Instance
         run: |
-          docker tag education-api:latest acrokotwicaprod.azurecr.io/education-api:latest
-          docker push acrokotwicaprod.azurecr.io/education-api:latest
+          # Supprimer l'ACI existante (si elle existe)
+          az container delete \
+            --name education-api-container \
+            --resource-group ${{ secrets.AZURE_RESSOURCE_GROUP }} \
+            --yes || true
+
+          # Créer un nouveau conteneur dans la région France Central avec les paramètres requis
+          az container create \
+            --resource-group ${{ secrets.AZURE_RESSOURCE_GROUP }} \
+            --name education-api-container \
+            --image olaffsen/education-api:latest \
+            --location "francecentral" \
+            --cpu 1 --memory 1.5 \
+            --dns-name-label education-api \
+            --ports 8000 \
+            --restart-policy OnFailure \
+            --registry-login-server docker.io \
+            --registry-username ${{ secrets.DOCKERHUB_USERNAME }} \
+            --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
+            --environment-variables \
+              SQL_ADMIN_USERNAME=${{ secrets.SQL_ADMIN_USERNAME }} \
+              SQL_ADMIN_PASSWORD=${{ secrets.SQL_ADMIN_PASSWORD }} \
+            --no-wait
+
+      - name: 🔗 Print ACI Public URL
+        run: |
+          az container show \
+            --name education-api-container \
+            --resource-group ${{ secrets.AZURE_RESSOURCE_GROUP }} \
+            --query ipAddress.fqdn \
+            --output tsv
+
+
+    # ACR remplacer par un ACI
+    #   - name: 🔐 Login to Azure Container Registry (ACR)
+    #     run: echo "${{ secrets.ACR_PASSWORD }}" | docker login acrokotwicaprod.azurecr.io -u ${{ secrets.ACR_USERNAME }} --password-stdin
+      
+    #   - name: 🚀 Push to ACR
+    #     run: |
+    #       docker tag education-api:latest acrokotwicaprod.azurecr.io/education-api:latest
+    #       docker push acrokotwicaprod.azurecr.io/education-api:latest
       
 
