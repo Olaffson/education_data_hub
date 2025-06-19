@@ -2,7 +2,8 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import ips_lycee, auth, ecoles_effectifs
+from app.routers import ips_lycee, auth
+# from app.routers import ecoles_effectifs
 
 app = FastAPI(
     title="Education Data API",
