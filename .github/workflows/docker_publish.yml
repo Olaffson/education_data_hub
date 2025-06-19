@@ -3,8 +3,12 @@ name: "Build & Push Docker Image"
 on:
   workflow_dispatch:
 
+permissions:
+  id-token: write  # Nécessaire pour Azure OIDC login
+  contents: read   # Pour pouvoir cloner le repo
+
 jobs:
-  build-and-push:
+  build-and-deploy:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -26,7 +30,7 @@ jobs:
       - name: 🐳 Push to Docker Hub
         run: docker push olaffsen/education-api:latest
 
-      - name: 🔐 Azure Login
+      - name: 🔐 Azure Login (OIDC)
         uses: azure/login@v1
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -43,7 +47,6 @@ jobs:
           az container create \
             --resource-group ${{ secrets.AZURE_RESSOURCE_GROUP }} \
             --name education-api-container \
-            --location "francecentral" \
             --image olaffsen/education-api:latest \
             --cpu 1 --memory 1.5 \
             --dns-name-label education-api \
@@ -52,7 +55,69 @@ jobs:
             --registry-login-server docker.io \
             --registry-username ${{ secrets.DOCKERHUB_USERNAME }} \
             --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
+            --location "France Central" \
             --environment-variables \
-              SQL_ADMIN_USERNAME=${{ secrets.SQL_ADMIN_USERNAME }} \
-              SQL_ADMIN_PASSWORD=${{ secrets.SQL_ADMIN_PASSWORD }} \
+                SQL_ADMIN_USERNAME=${{ secrets.SQL_ADMIN_USERNAME }} \
+                SQL_ADMIN_PASSWORD=${{ secrets.SQL_ADMIN_PASSWORD }} \
             --no-wait
+
+
+
+# name: "Build & Push Docker Image"
+
+# on:
+#   workflow_dispatch:
+
+# jobs:
+#   build-and-push:
+#     runs-on: ubuntu-latest
+#     defaults:
+#       run:
+#         working-directory: ./api
+
+#     steps:
+#       - name: 🛎️ Checkout code
+#         uses: actions/checkout@v3
+
+#       - name: 🔐 Log in to Docker Hub
+#         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+#       - name: 🏗️ Build Docker image
+#         run: docker build -t education-api:latest .
+
+#       - name: 🏷️ Tag image
+#         run: docker tag education-api:latest olaffsen/education-api:latest
+
+#       - name: 🐳 Push to Docker Hub
+#         run: docker push olaffsen/education-api:latest
+
+#       - name: 🔐 Azure Login
+#         uses: azure/login@v1
+#         with:
+#           client-id: ${{ secrets.AZURE_CLIENT_ID }}
+#           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+#           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+#       - name: 🚀 Deploy DockerHub image to Azure Container Instance
+#         run: |
+#           az container delete \
+#             --name education-api-container \
+#             --resource-group ${{ secrets.AZURE_RESSOURCE_GROUP }} \
+#             --yes || true
+
+#           az container create \
+#             --resource-group ${{ secrets.AZURE_RESSOURCE_GROUP }} \
+#             --name education-api-container \
+#             --location "francecentral" \
+#             --image olaffsen/education-api:latest \
+#             --cpu 1 --memory 1.5 \
+#             --dns-name-label education-api \
+#             --ports 8000 \
+#             --restart-policy OnFailure \
+#             --registry-login-server docker.io \
+#             --registry-username ${{ secrets.DOCKERHUB_USERNAME }} \
+#             --registry-password ${{ secrets.DOCKERHUB_TOKEN }} \
+#             --environment-variables \
+#               SQL_ADMIN_USERNAME=${{ secrets.SQL_ADMIN_USERNAME }} \
+#               SQL_ADMIN_PASSWORD=${{ secrets.SQL_ADMIN_PASSWORD }} \
+#             --no-wait
