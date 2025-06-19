@@ -26,3 +26,28 @@ class IpsLyceeOut(BaseModel):
 
     class Config:
         orm_mode = True
+
+class EcoleEffectifOut(BaseModel):
+    rentree_scolaire: Optional[int]
+    region_academique: Optional[str]
+    academie: Optional[str]
+    departement: Optional[str]
+    commune: Optional[str]
+    numero_de_l_ecole: Optional[str]
+    denomination_principale: Optional[str]
+    patronyme: Optional[str]
+    secteur: Optional[str]
+    rep: Optional[int]
+    rep_plus: Optional[int]
+    nombre_total_de_classes: Optional[int]
+    nombre_total_d_eleves: Optional[int]
+    nombre_d_eleves_en_pre_elementaire_hors_ulis: Optional[int]
+    nombre_d_eleves_en_elementaire_hors_ulis: Optional[int]
+    nombre_d_eleves_en_ulis: Optional[int]
+    nombre_d_eleves_en_cp_hors_ulis: Optional[int]
+    nombre_d_eleves_en_ce1_hors_ulis: Optional[int]
+    nombre_d_eleves_en_ce2_hors_ulis: Optional[int]
+    nombre_d_eleves_en_cm1_hors_ulis: Optional[int]
+    nombre_d_eleves_en_cm2_hors_ulis: Optional[int]
+    tri: Optional[str]
+    code_postal: Optional[int]

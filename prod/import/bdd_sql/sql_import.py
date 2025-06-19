@@ -85,6 +85,7 @@ def import_csv_blob_to_sql(blob_name: str):
         except:
             pass
 
+# remplacer par import_csv_blob_to_sql
 def import_ips_lycee_to_sql():
     logger.info("📥 Début import des données IPS lycée")
 
@@ -160,6 +161,7 @@ def import_ips_lycee_to_sql():
         except:
             pass
 
+# remplacer par import_csv_blob_to_sql
 def import_effectifs_tg_to_sql():
     logger.info("📥 Début import des données Effectifs TG")
 
