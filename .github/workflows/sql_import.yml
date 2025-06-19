@@ -36,6 +36,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: 🔍 Vérification unidecode
+        run: |
+          python -c "import unidecode; print('✅ unidecode est installé')"
+
+
   import-ips-lycee:
     name: "📄 Import ips_lycee.csv"
     needs: setup
