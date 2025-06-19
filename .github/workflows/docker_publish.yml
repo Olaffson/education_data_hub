@@ -1,0 +1,27 @@
+name: "Build & Push Docker Image"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api
+
+    steps:
+      - name: 🛎️ Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🔐 Log in to Docker Hub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+      - name: 🏗️ Build Docker image
+        run: docker build -t education-api:latest .
+
+      - name: 🏷️ Tag image
+        run: docker tag education-api:latest olaffsen/education-api:latest
+
+      - name: 📤 Push to Docker Hub
+        run: docker push olaffsen/education-api:latest
