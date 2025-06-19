@@ -2,15 +2,11 @@ name: "Import Data to SQL"
 
 on:
   workflow_dispatch:
-  # schedule:
-  #   - cron: '0 0 1 * *'
 
 jobs:
   setup:
     name: "🛠️ Setup Environment"
     runs-on: ubuntu-latest
-    outputs:
-      python-version: '3.10'
     steps:
       - name: 🛎 Checkout Repository
         uses: actions/checkout@v3
@@ -25,8 +21,7 @@ jobs:
           sudo curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
           curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
           sudo apt-get update
-          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
-          sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18 mssql-tools18
           echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc
           source ~/.bashrc
 
@@ -37,9 +32,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: 🔍 Vérification unidecode
-        run: |
-          python -c "import unidecode; print('✅ unidecode est installé')"
-
+        run: python -c "import unidecode; print('✅ unidecode est installé')"
 
   import-ips-lycee:
     name: "📄 Import ips_lycee.csv"
@@ -51,7 +44,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: python -m bdd_sql.import_ips_lycee_to_sql
-        env:
+        env: &secrets
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
@@ -68,12 +61,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: python -m bdd_sql.import_effectifs_tg_to_sql
-        env:
-          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          SQL_ADMIN_USERNAME: ${{ secrets.SQL_ADMIN_USERNAME }}
-          SQL_ADMIN_PASSWORD: ${{ secrets.SQL_ADMIN_PASSWORD }}
+        env: *secrets
 
   import-ecoles-effectifs:
     name: "📄 Import ecoles_effectifs.csv"
@@ -85,12 +73,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: python -m bdd_sql.import_ecoles_effectifs_to_sql
-        env:
-          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          SQL_ADMIN_USERNAME: ${{ secrets.SQL_ADMIN_USERNAME }}
-          SQL_ADMIN_PASSWORD: ${{ secrets.SQL_ADMIN_PASSWORD }}
+        env: *secrets
 
   import-bac-par-academie:
     name: "📄 Import bac_par_academie.csv"
@@ -102,12 +85,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: python -m bdd_sql.import_bac_par_academie_to_sql
-        env:
-          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          SQL_ADMIN_USERNAME: ${{ secrets.SQL_ADMIN_USERNAME }}
-          SQL_ADMIN_PASSWORD: ${{ secrets.SQL_ADMIN_PASSWORD }}
+        env: *secrets
 
   upload-logs:
     name: 📝 Upload Logs
