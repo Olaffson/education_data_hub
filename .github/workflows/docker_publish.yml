@@ -25,3 +25,22 @@ jobs:
 
       - name: 📤 Push to Docker Hub
         run: docker push olaffsen/education-api:latest
+
+      - name: 🔐 Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: 🐳 Push image to Azure Container Registry (ACR)
+        run: |
+          # Re-tag l'image Docker avec le nom de ton ACR
+          docker tag education-api:latest acrokotwicaprod.azurecr.io/education-api:latest
+
+          # Login à l'ACR
+          az acr login --name acrokotwicaprod
+
+          # Push vers l'ACR
+          docker push acrokotwicaprod.azurecr.io/education-api:latest
+
