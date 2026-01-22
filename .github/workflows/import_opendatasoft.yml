@@ -2,8 +2,8 @@ name: "Import OpenDataSoft Data to Azure"
 
 on:
   workflow_dispatch:  # Déclenchement manuel
-  schedule:
-    - cron: '0 0 1 * *'  # Le 1er de chaque mois à minuit
+  # schedule:
+  #   - cron: '0 0 1 * *'  # Le 1er de chaque mois à minuit
 
 jobs:
   check-and-import:
